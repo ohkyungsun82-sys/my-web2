@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 음성 지원 웹개발 강의 스튜디오</title>
+    <title>사이버 탐구 & 진로 맞춤형 웹개발 스튜디오</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -25,11 +25,18 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
         .stage-badge { background: #ff0055; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
         
-        /* 강의실 스타일 */
-        .lecture-card { background: #252525; border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; margin-bottom: 12px; line-height: 1.6; font-size: 14px; position: relative; }
+        /* 분야 선택 카테고리 버튼 */
+        .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .cat-btn { background: #252525; border: 2px solid #00ffcc; color: #fff; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; font-size: 15px; transition: 0.2s; }
+        .cat-btn:hover { background: #00ffcc; color: #000; }
+
+        .lecture-card { background: #252525; border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; margin-bottom: 12px; line-height: 1.6; font-size: 14px; }
         .lecture-title { color: #00ffcc; font-weight: bold; font-size: 17px; margin-bottom: 8px; }
-        .tts-btn { background: #00bfff; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-bottom: 10px; }
+        .tts-btn { background: #00bfff; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 5px; margin-bottom: 10px; }
         
+        .guide-box { background: #1a1a1a; border-left: 4px solid #ff0055; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 13px; color: #ffcc00; }
+        .code-example { background: #111; color: #00ffcc; padding: 8px; border-radius: 5px; font-family: monospace; margin-top: 5px; font-size: 13px; }
+
         .user-info { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
         .admin-badge { background: #ff0055; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; }
         .board-container { max-height: 180px; overflow-y: auto; margin-top: 15px; }
@@ -49,12 +56,19 @@
 <body>
 
     <div id="app-container">
-        <div class="title">사이버 탐구 & 음성 지원 강의 스튜디오</div>
-        <div class="subtitle">AI 음성 강의 & 실시간 코드 공유 플랫폼</div>
+        <div class="title">사이버 탐구 & 진로 맞춤형 스튜디오</div>
+        <div class="subtitle">암호학 · 게임 개발 · 디코 봇 · 화이트 해커 (분야별 10개 강의)</div>
 
+        <!-- 메인 메뉴 -->
         <div id="main-menu-screen" class="screen active">
-            <button class="menu-btn" onclick="openTraining()">📖 웹개발 실전 강의실 (음성 강의 포함)</button>
-            <button class="menu-btn" onclick="openStageCreator()">✏️ 나만의 강의/실습 직접 만들기</button>
+            <div style="color:#00ffcc; font-weight:bold; margin-bottom:10px; text-align:center;">🎯 탐구하고 싶은 진로 분야를 선택하세요!</div>
+            <div class="category-grid">
+                <button class="cat-btn" onclick="selectCategory('crypto')">🔐 암호학 / 보안</button>
+                <button class="cat-btn" onclick="selectCategory('game')">🎮 게임 개발</button>
+                <button class="cat-btn" onclick="selectCategory('discord')">🤖 디스코드 봇 개발</button>
+                <button class="cat-btn" onclick="selectCategory('hacker')">🛡️ 화이트 해커</button>
+            </div>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 나만의 강의 직접 만들기</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
         </div>
 
@@ -69,12 +83,15 @@
             
             <div class="lecture-card" id="lecture-content-box">
                 <div class="lecture-title" id="lec-title">강의 제목</div>
-                <button class="tts-btn" onclick="playLectureVoice()">🔊 강의 음성으로 듣기</button>
-                <button class="tts-btn" onclick="stopLectureVoice()" style="background:#444; color:#fff;">⏹ 음성 정지</button>
-                <div id="lec-body" style="margin-top:10px;">강의 설명 내용이 들어갑니다.</div>
+                <div>
+                    <button class="tts-btn" onclick="playLectureVoice()">🔊 음성으로 듣기</button>
+                    <button class="tts-btn" onclick="stopLectureVoice()" style="background:#444; color:#fff;">⏹ 정지</button>
+                </div>
+                <div id="lec-body" style="margin-top:8px;">강의 설명 내용</div>
+                <div class="guide-box" id="lec-guide">가이드</div>
             </div>
 
-            <textarea id="code-input" placeholder="강의를 읽고 여기에 실습 코드를 입력하세요!" style="height:90px;"></textarea>
+            <textarea id="code-input" placeholder="여기에 실습 코드를 작성하세요." style="height:90px;"></textarea>
             <button class="action-btn" onclick="checkCode()">▶ 실습 결과 확인하기</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
             <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
@@ -82,10 +99,11 @@
 
         <div id="creator-screen" class="screen">
             <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 강의 및 실습 만들기</h3>
-            <input type="text" id="custom-title" placeholder="강의 주제 이름 (예: 3강. 나만의 버튼 만들기)" style="font-size:13px;">
-            <textarea id="custom-lecture" placeholder="[개념 강의 내용] 학생들에게 음성으로 설명할 내용을 적어주세요." style="height:70px; font-size:13px;"></textarea>
-            <textarea id="custom-msg" placeholder="[실습 미션 설명] 학생들이 해야 할 행동을 적어주세요." style="height:50px; font-size:13px;"></textarea>
-            <input type="text" id="custom-reqs" placeholder="필수 포함 키워드 쉼표로 구분 (예: &lt;button&gt;, &lt;/button&gt;)" style="font-size:13px;">
+            <input type="text" id="custom-title" placeholder="강의 주제 이름" style="font-size:13px;">
+            <textarea id="custom-lecture" placeholder="[개념 강의 내용]" style="height:60px; font-size:13px;"></textarea>
+            <textarea id="custom-msg" placeholder="[실습 미션 설명]" style="height:40px; font-size:13px;"></textarea>
+            <input type="text" id="custom-reqs" placeholder="필수 포함 키워드 쉼표 구분" style="font-size:13px;">
+            <textarea id="custom-guide" placeholder="[상세 작성 가이드 및 정답 예시 팁]" style="height:50px; font-size:13px;"></textarea>
             <button class="action-btn" onclick="saveCustomStage()">강의 등록하기</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
         </div>
@@ -173,6 +191,7 @@
     <script>
         let currentUser = localStorage.getItem("active_user") || null;
         let autoRefreshInterval = null;
+        let selectedCategory = 'crypto'; // 기본 선택 분야
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -188,7 +207,7 @@
         function changeScreen(name) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.getElementById(name + '-screen').classList.add('active');
-            stopLectureVoice(); // 화면이 바뀔 때 음성 자동 정지
+            stopLectureVoice();
             if (name !== 'board' && autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
                 autoRefreshInterval = null;
@@ -201,96 +220,80 @@
             changeScreen('main-menu');
         }
 
-        // 🔊 브라우저 내장 음성 합성(TTS) 함수
         function playLectureVoice() {
-            if (!('speechSynthesis' in window)) {
-                alert("이 브라우저는 음성 출력을 지원하지 않습니다.");
-                return;
-            }
-            window.speechSynthesis.cancel(); // 기존 재생 중인 음성 중지
-
+            if (!('speechSynthesis' in window)) { alert("음성 미지원 브라우저"); return; }
+            window.speechSynthesis.cancel();
             let title = document.getElementById("lec-title").innerText;
             let body = document.getElementById("lec-body").innerText;
-            let textToSpeak = title + ". " + body;
-
-            let utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = 'ko-KR'; // 한국어 설정
-            utterance.rate = 1.0; // 말하기 속도
+            let utterance = new SpeechSynthesisUtterance(title + ". " + body);
+            utterance.lang = 'ko-KR';
             window.speechSynthesis.speak(utterance);
         }
 
         function stopLectureVoice() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
+            if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
         }
 
-        const baseLectures = [
-            {
-                title: "1강. HTML과 웹페이지의 기본 뼈대 만들기",
-                lecture: "안녕하세요! 오늘 80분 동안 우리는 나만의 웹사이트를 직접 만들어볼 겁니다. 웹페이지의 가장 큰 제목은 h1 태그를 사용합니다. 여는 태그가 있으면 반드시 닫는 태그를 함께 적어주어야 컴퓨터가 인식할 수 있어요.",
-                msg: "<b>[실습 미션]</b> &lt;h1&gt; 태그를 활용해 화면에 'Hello Web'이라는 제목을 만들어보세요!",
-                req: ["<h1>", "Hello Web", "</h1>"]
-            },
-            {
-                title: "2강. 부제목과 본문 텍스트 작성하기",
-                lecture: "제목을 만들었으면 그 아래에 설명 글이나 본문을 적어볼 차례입니다. 중간 크기 제목은 h2를 쓰며, 일반적인 문단 글 텍스트는 p 태그를 사용해서 작성합니다.",
-                msg: "<b>[실습 미션]</b> &lt;h2&gt; 태그로 '소개'라는 부제목을, &lt;p&gt; 태그로 본문 글을 각각 작성해 완성해보세요.",
-                req: ["<h2>", "</h2>", "<p>", "</p>"]
-            },
-            {
-                title: "3강. 사용자가 누를 수 있는 인터랙티브 버튼 만들기",
-                lecture: "웹페이지에 기능이나 이벤트를 넣고 싶을 때 가장 많이 쓰는 것이 바로 button 태그입니다. 버튼 태그 사이에 원하는 글자를 적으면 누를 수 있는 멋진 버튼 상자가 만들어집니다.",
-                msg: "<b>[실습 미션]</b> &lt;button&gt; 태그를 만들고, 버튼 안에 '시작하기'라는 글자를 넣어 구현해보세요.",
-                req: ["<button>", "시작하기", "</button>"]
-            },
-            {
-                title: "4강. 데이터를 입력받는 인풋(Input) 상자",
-                lecture: "회원가입 창이나 검색창을 만들 때 사용자의 입력을 받는 네모난 빈 칸이 필요하죠? 이 빈 칸을 만들어주는 태그가 바로 input입니다. 닫는 태그가 따로 없는 독특한 특징이 있어요.",
-                msg: "<b>[실습 미션]</b> 글자를 입력할 수 있는 &lt;input&gt; 태그를 화면에 배치해보세요.",
-                req: ["<input>"]
-            },
-            {
-                title: "5강. 다른 웹사이트로 이동하는 링크(a 태그) 연결하기",
-                lecture: "웹의 핵심은 바로 연결성입니다! 다른 페이지나 포털 사이트로 이동할 수 있는 링크를 만들려면 a href 태그를 사용합니다. 에이치프 속성 안에 이동할 웹사이트 주소를 적어줍니다.",
-                msg: "<b>[실습 미션]</b> &lt;a href=&quot;...&quot;&gt; 태그를 활용해 링크를 만들어보세요.",
-                req: ["<a", "href="]
-            },
-            {
-                title: "6강. 웹페이지에 이미지(사진) 띄우기",
-                lecture: "글자만 있으면 지루하겠죠? 웹페이지에 사진이나 로고를 띄울 때는 img src 태그를 사용합니다. 에스알씨 속성은 사진 파일이 어디에 있는지 알려주는 내비게이션 역할을 합니다.",
-                msg: "<b>[실습 미션]</b> &lt;img src=&quot;...&quot;&gt; 태그를 작성해 사진 칸을 추가해보세요.",
-                req: ["<img", "src="]
-            },
-            {
-                title: "7강. 동아리 소개 목록을 점(Bullet)으로 정리하기",
-                lecture: "여러 가지 항목이나 동아리 활동 계획을 깔끔하게 나열할 때는 목록 태그를 씁니다. 순서가 없는 목록은 유엘로 감싸고, 각 항목은 엘아이 태그로 적어줍니다.",
-                msg: "<b>[실습 미션]</b> &lt;ul&gt;과 &lt;li&gt; 태그를 함께 써서 목록을 2개 이상 만들어보세요.",
-                req: ["<ul>", "<li>", "</li>", "</ul>"]
-            },
-            {
-                title: "8강. CSS 스타일 속성으로 글자 색상 꾸미기",
-                lecture: "HTML이 웹의 뼈대라면, 디자인과 색상을 입히는 것은 스타일입니다. 태그 안에 스타일 속성을 추가하면 글자 색상을 내 마음대로 바꿀 수 있습니다.",
-                msg: "<b>[실습 미션]</b> style 속성을 이용해 글자에 색상을 입히는 코드를 작성해보세요.",
-                req: ["style=", "color:"]
-            },
-            {
-                title: "9강. 상자의 배경색과 박스 스타일링",
-                lecture: "웹페이지 전체나 특정 영역의 분위기를 바꾸려면 배경색을 지정해야 합니다. 백그라운드 컬러 속성을 사용하면 배경 색상을 화려하게 꾸밀 수 있습니다.",
-                msg: "<b>[실습 미션]</b> background-color 속성을 포함한 코드를 작성해보세요.",
-                req: ["background-color"]
-            },
-            {
-                title: "10강. 최종 프로젝트: 나만의 동아리 홈페이지 완성하기",
-                lecture: "축하합니다! 이제 여러분은 1강부터 배워온 모든 HTML 태그와 속성을 활용할 수 있습니다. 제목, 본문, 버튼, 이미지, 링크가 모두 들어간 완벽한 나만의 웹페이지 코드를 작성하고 스튜디오에 공유해 보세요!",
-                msg: "<b>[실습 미션]</b> 제목(&lt;h1&gt;)과 버튼(&lt;button&gt;)이 모두 포함된 나만의 웹페이지 코드를 완성해 제출하세요!",
-                req: ["<h1>", "<button>"]
-            }
-        ];
+        // 🛡️ [분야별 10개씩 총 40개 정밀 강의 커리큘럼 데이터]
+        const allCourses = {
+            crypto: [
+                { title: "1강. 암호학의 기초와 대칭키 개념", lecture: "암호학은 정보를 안전하게 보호하는 학문입니다. 평문(원본)을 암호문으로 바꾸는 과정을 학습합니다.", msg: "[실습] 시저 암호화 원리를 이해하기 위한 <h2> 태그를 작성해 보세요.", req: ["<h2>", "</h2>"], guide: "예시: <h2>Caesar Cipher</h2>" },
+                { title: "2강. 카이사르(시저) 암호 알고리즘", lecture: "알파벳을 일정한 칸 수만큼 밀어서 암호화하는 고대 암호 기법입니다.", msg: "[실습] shift라는 단어가 포함된 <p> 태그를 만드세요.", req: ["<p>", "shift", "</p>"], guide: "예시: <p>shift 3</p>" },
+                { title: "3강. 해시(Hash) 함수의 이해와 무결성", lecture: "데이터를 고정된 길이의 암호화된 값으로 바꾸는 단방향 함수입니다.", msg: "[실습] SHA-256 해시 개념을 적는 <h3> 태그를 작성하세요.", req: ["<h3>", "SHA", "</h3>"], guide: "예시: <h3>SHA-256</h3>" },
+                { title: "4강. 대칭키 암호화(AES)의 원리", lecture: "암호화와 복호화에 동일한 키를 사용하는 방식입니다.", msg: "[실습] AES-128 버튼을 만들어보세요.", req: ["<button>", "AES", "</button>"], guide: "예시: <button>AES-128</button>" },
+                { title: "5강. 비대칭키 암호화(공개키/개인키)", lecture: "공개키로 암호화하고 개인키로 복호화하는 혁신적인 암호 체계입니다.", msg: "[실습] Public Key 링크 태그를 작성하세요.", req: ["<a", "PublicKey"], guide: "예시: <a href='#'>PublicKey</a>" },
+                { title: "6강. RSA 암호 알고리즘 실습", lecture: "큰 소수의 곱을 이용한 대표적인 공개키 암호화 알고리즘입니다.", msg: "[실습] RSA 알고리즘 명칭을 <h1>으로 작성하세요.", req: ["<h1>", "RSA", "</h1>"], guide: "예시: <h1>RSA Algorithm</h1>" },
+                { title: "7강. 디지털 서명과 인증서", lecture: "데이터의 송신자를 확인하고 위변조를 막는 전자 서명 기술입니다.", msg: "[실습] Digital Signature 문단을 만드세요.", req: ["<p>", "Signature", "</p>"], guide: "예시: <p>Digital Signature</p>" },
+                { title: "8강. 블록체인과 암호학의 만남", lecture: "블록 간 연결에 해시 함수를 사용하여 위변조가 불가능하게 만든 기술입니다.", msg: "[실습] Block이라는 단어가 들어간 버튼을 만드세요.", req: ["<button>", "Block", "</button>"], guide: "예시: <button>Block</button>" },
+                { title: "9강. 양자 암호와 미래 보안", lecture: "양자 컴퓨터의 등장에 대비하는 포스트 퀀텀 암호 기술을 학습합니다.", msg: "[실습] Quantum이라는 단어를 <h2>로 작성하세요.", req: ["<h2>", "Quantum", "</h2>"], guide: "예시: <h2>Quantum</h2>" },
+                { title: "10강. 최종 프로젝트: 나만의 암호 해독기 웹페이지", lecture: "지금까지 배운 암호학 지식을 총동원해 나만의 암호 웹사이트를 완성하세요!", msg: "[실습] 제목과 암호화 버튼을 포함한 코드를 완성하세요.", req: ["<h1>", "<button>"], guide: "예시: <h1>Crypto Tool</h1><button>Encrypt</button>" }
+            ],
+            game: [
+                { title: "1강. 게임 개발의 기초와 HTML5 Canvas", lecture: "웹 브라우저에서 게임을 구동하기 위한 기본 캔버스 태그를 학습합니다.", msg: "[실습] 게임 화면을 담당하는 <canvas> 태그를 작성하세요.", req: ["<canvas>"], guide: "예시: <canvas id='gameCanvas'></canvas>" },
+                { title: "2강. 게임 루프(Game Loop)와 렌더링", lecture: "화면을 지속적으로 새로고침하며 캐릭터를 움직이는 게임 루프 개념입니다.", msg: "[실습] GameLoop 명칭을 <h2>로 적어보세요.", req: ["<h2>", "GameLoop", "</h2>"], guide: "예시: <h2>GameLoop</h2>" },
+                { title: "3강. 2D 좌표계와 플레이어 캐릭터 생성", lecture: "X, Y 좌표를 이용해 화면 위에 플레이어 객체를 배치합니다.", msg: "[실습] Player 캐릭터 생성 버튼을 만드세요.", req: ["<button>", "Player", "</button>"], guide: "예시: <button>Spawn Player</button>" },
+                { title: "4강. 키보드 입력 이벤트 처리 (WASD)", lecture: "사용자의 키보드 조작에 따라 캐릭터를 이동시키는 로직을 다룹니다.", msg: "[실습] KeyDown 문단을 작성하세요.", req: ["<p>", "KeyDown", "</p>"], guide: "예시: <p>KeyDown Event</p>" },
+                { title: "5강. 물리 엔진과 중력(Gravity) 구현", lecture: "점프와 낙하를 구현하기 위해 가속도와 중력 공식을 적용합니다.", msg: "[실습] Gravity 설정을 <h3>로 작성하세요.", req: ["<h3>", "Gravity", "</h3>"], guide: "예시: <h3>Gravity</h3>" },
+                { title: "6강. 충돌 검출(Collision Detection) 알고리즘", lecture: "캐릭터와 장애물이 서로 부딪혔는지 판정하는 AABB 충돌을 학습합니다.", msg: "[실습] Collision 검출 버튼을 만드세요.", req: ["<button>", "Collision", "</button>"], guide: "예시: <button>Check Collision</button>" },
+                { title: "7강. 점수 시스템과 UI 오버레이", lecture: "게임 플레이 중 획득한 점수를 화면에 실시간으로 표시합니다.", msg: "[실습] Score 텍스트를 <h1>으로 작성하세요.", req: ["<h1>", "Score", "</h1>"], guide: "예시: <h1 id='score'>Score: 0</h1>" },
+                { title: "8강. 적(Enemy) AI와 스폰 메커니즘", lecture: "주기적으로 적 캐릭터가 생성되고 플레이어를 추적하는 AI를 구현합니다.", msg: "[실습] Enemy 스폰 문단을 만드세요.", req: ["<p>", "Enemy", "</p>"], guide: "예시: <p>Enemy Spawn</p>" },
+                { title: "9강. 사운드 효과와 배경음악(BGM) 추가", lecture: "게임의 몰입감을 높여주는 오디오 API 활용법을 학습합니다.", msg: "[실습] Audio 제어 버튼을 만드세요.", req: ["<button>", "Audio", "</button>"], guide: "예시: <button>Play BGM</button>" },
+                { title: "10강. 최종 프로젝트: 웹 아케이드 미니게임 완성", lecture: "배운 모든 요소를 합쳐 나만의 멋진 웹 게임을 완성해 공유하세요!", msg: "[실습] 게임 타이틀과 시작 버튼이 포함된 코드를 작성하세요.", req: ["<h1>", "<button>"], guide: "예시: <h1>Mini Game</h1><button>Start Game</button>" }
+            ],
+            discord: [
+                { title: "1강. 디스코드 봇 개발 환경 세팅과 Node.js", lecture: "자바스크립트 기반의 Discord.js 라이브러리를 활용해 봇의 뼈대를 잡습니다.", msg: "[실습] Discord.js 봇 초기화 문단을 만드세요.", req: ["<p>", "Discord.js", "</p>"], guide: "예시: <p>Discord.js Bot</p>" },
+                { title: "2강. 봇 토큰(Token)과 보안 관리", lecture: "디스코드 개발자 포털에서 봇을 생성하고 토큰을 안전하게 다루는 법을 배웁니다.", msg: "[실습] Bot Token 설정 <h2>을 작성하세요.", req: ["<h2>", "Token", "</h2>"], guide: "예시: <h2>Bot Token</h2>" },
+                { title: "3강. 메시지 이벤트 감지 (Ping-Pong 봇)", lecture: "사용자가 특정 채팅을 쳤을 때 봇이 자동으로 반응하도록 이벤트를 설정합니다.", msg: "[실습] Ping-Pong 응답 버튼을 만드세요.", req: ["<button>", "Ping", "</button>"], guide: "예시: <button>Ping-Pong</button>" },
+                { title: "4강. 슬래시 명령어(Slash Commands) 도입", lecture: "디스코드 최신 표준인 대화형 슬래시(/) 명령어를 등록하는 방법입니다.", msg: "[실습] Slash Command 명칭을 <h3>로 적으세요.", req: ["<h3>", "Command", "</h3>"], guide: "예시: <h3>Slash Command</h3>" },
+                { title: "5강. 임베드(Embed) 메시지로 예쁘게 꾸미기", lecture: "색상, 이미지, 필드가 포함된 고급스러운 임베드 메시지를 전송합니다.", msg: "[실습] Embed 메시지 생성 버튼을 만드세요.", req: ["<button>", "Embed", "</button>"], guide: "예시: <button>Send Embed</button>" },
+                { title: "6강. 역할(Role) 부여 및 권한 제어", lecture: "특정 조건을 만족한 유저에게 자동으로 서버 역할을 부여하는 기능을 구현합니다.", msg: "[실습] Role 관리 문단을 만드세요.", req: ["<p>", "Role", "</p>"], guide: "예시: <p>Auto Role</p>" },
+                { title: "7강. 음악 재생 봇(Voice Channel) 연동", lecture: "음성 채널에 입장해 유튜브 음악을 재생하는 봇의 구조를 학습합니다.", msg: "[실습] Voice Channel 연결 버튼을 만드세요.", req: ["<button>", "Voice", "</button>"], guide: "예시: <button>Join Voice</button>" },
+                { title: "8강. 모니터링 로그(Log) 시스템 구축", lecture: "서버 내 채팅 삭제, 유저 입장/퇴장 등의 이벤트를 로그 채널에 기록합니다.", msg: "[실습] Log 시스템 <h2>을 작성하세요.", req: ["<h2>", "Logging", "</h2>"], guide: "예시: <h2>Server Logging</h2>" },
+                { title: "9강. 데이터베이스 연동과 레벨링 시스템", lecture: "유저의 채팅 활동에 따라 경험치를 부여하고 레벨업을 시키는 시스템입니다.", msg: "[실습] Leveling 시스템 버튼을 만드세요.", req: ["<button>", "Level", "</button>"], guide: "예시: <button>Check Level</button>" },
+                { title: "10강. 최종 프로젝트: 다기능 동아리 관리 디스코드 봇", lecture: "완성된 봇 소스 코드를 웹 스튜디오에 공유하고 친구들과 테스트해 보세요!", msg: "[실습] 봇 타이틀과 실행 버튼이 포함된 코드를 작성하세요.", req: ["<h1>", "<button>"], guide: "예시: <h1>Discord Bot</h1><button>Run Bot</button>" }
+            ],
+            hacker: [
+                { title: "1강. 화이트 해커의 윤리 and 모의해킹 개요", lecture: "시스템의 취약점을 분석하고 보완하는 윤리적 해커의 역할과 마인드를 배웁니다.", msg: "[실습] White Hacker 명칭을 <h1>으로 작성하세요.", req: ["<h1>", "Hacker", "</h1>"], guide: "예시: <h1>White Hacker</h1>" },
+                { title: "2강. 네트워크 스캐닝과 포트 분석 (Nmap)", lecture: "타겟 시스템에 열려있는 포트와 서비스 버전을 탐색하는 기법입니다.", msg: "[실습] Port Scanning 문단을 만드세요.", req: ["<p>", "Port", "</p>"], guide: "예시: <p>Port Scanning</p>" },
+                { title: "3강. 웹 취약점 진단 (OWASP Top 10)", lecture: "전 세계 웹 애플리케이션의 가장 치명적인 10대 취약점을 분석합니다.", msg: "[실습] OWASP Top 10 <h2>을 작성하세요.", req: ["<h2>", "OWASP", "</h2>"], guide: "예시: <h2>OWASP Top 10</h2>" },
+                { title: "4강. SQL 인젝션(SQLi) 공격과 방어", lecture: "로그인 인증 우회 등 데이터베이스를 조작하는 SQL 인젝션 원리를 파악합니다.", msg: "[실습] SQL Injection 방어 버튼을 만드세요.", req: ["<button>", "SQLi", "</button>"], guide: "예시: <button>Block SQLi</button>" },
+                { title: "5강. XSS(Cross-Site Scripting) 취약점", lecture: "악성 스크립트를 웹 페이지에 삽입해 세션을 탈취하는 공격 기법입니다.", msg: "[실습] XSS 취약점 진단 문단을 만드세요.", req: ["<p>", "XSS", "</p>"], guide: "예시: <p>XSS Vulnerability</p>" },
+                { title: "6강. 패킷 분석과 스니핑 (Wireshark)", lecture: "네트워크 상을 오가는 데이터 패킷을 가로채고 분석하는 기술입니다.", msg: "[실습] Packet Sniffing 버튼을 만드세요.", req: ["<button>", "Packet", "</button>"], guide: "예시: <button>Capture Packets</button>" },
+                { title: "7강. 브루트 포스(Brute Force)와 패스워드 크래킹", lecture: "모든 경우의 수를 대입해 비밀번호를 알아내는 공격 대응법을 학습합니다.", msg: "[실습] Brute Force 방지 <h3>를 작성하세요.", req: ["<h3>", "BruteForce", "</h3>"], guide: "예시: <h3>BruteForce Defense</h3>" },
+                { title: "8강. 리버싱(Reverse Engineering) 기초", lecture: "컴파일된 바이너리 파일을 역으로 분석해 프로그램의 작동 원리를 파악합니다.", msg: "[실습] Reversing 분석 <h2>을 작성하세요.", req: ["<h2>", "Reversing", "</h2>"], guide: "예시: <h2>Binary Reversing</h2>" },
+                { title: "9강. 리눅스 보안 및 권한 설정 (Linux Sec)", lecture: "서버 운영체제인 리눅스의 파일 권한과 방화벽 설정법을 다룹니다.", msg: "[실습] Linux 권한 설정 버튼을 만드세요.", req: ["<button>", "Linux", "</button>"], guide: "예시: <button>Chmod 777</button>" },
+                { title: "10강. 최종 프로젝트: 취약점 진단 보고서 웹사이트", lecture: "지금까지 탐구한 모의해킹 결과를 정리한 보고서 웹페이지를 완성하세요!", msg: "[실습] 보고서 제목과 보안 검사 버튼이 포함된 코드를 작성하세요.", req: ["<h1>", "<button>"], guide: "예시: <h1>Security Report</h1><button>Scan</button>" }
+            ]
+        };
 
         let currentStage = 1;
         let currentMission = {};
         let customStagesList = [];
+
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            openTraining();
+        }
 
         function openStageCreator() {
             stopLectureVoice();
@@ -302,6 +305,7 @@
             let lecture = document.getElementById("custom-lecture").value.trim();
             let msg = document.getElementById("custom-msg").value.trim();
             let reqsStr = document.getElementById("custom-reqs").value.trim();
+            let guide = document.getElementById("custom-guide").value.trim();
 
             if (!title || !lecture || !msg || !reqsStr) {
                 alert("모든 칸을 빠짐없이 입력해주세요!");
@@ -312,20 +316,15 @@
 
             await fetch('/api/custom-stages', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, lecture, msg, reqs, tip: "직접 출제된 실습 문제입니다." })
+                body: JSON.stringify({ title, lecture, msg, reqs, tip: guide || "작성 가이드를 참고하세요." })
             });
 
-            alert("새로운 강의와 실습이 성공적으로 등록되었습니다!");
-            document.getElementById("custom-title").value = "";
-            document.getElementById("custom-lecture").value = "";
-            document.getElementById("custom-msg").value = "";
-            document.getElementById("custom-reqs").value = "";
+            alert("강의 등록 완료!");
             goHome();
         }
 
         async function openTraining() {
             changeScreen('training');
-            
             try {
                 let res = await fetch('/api/custom-stages');
                 customStagesList = await res.json();
@@ -344,22 +343,24 @@
         }
 
         function loadTrainingStage() {
-            stopLectureVoice(); // 강의가 바뀔 때 이전 음성 중지
+            stopLectureVoice();
             document.getElementById("stage-display").innerText = "LECTURE " + currentStage;
             document.getElementById("code-input").value = "";
             document.getElementById("feedback").innerText = "";
 
-            if (currentStage <= baseLectures.length) {
-                let lec = baseLectures[currentStage - 1];
+            let activeCourses = allCourses[selectedCategory] || allCourses['crypto'];
+
+            if (currentStage <= activeCourses.length) {
+                let lec = activeCourses[currentStage - 1];
                 currentMission = {
                     title: lec.title,
                     lectureText: lec.lecture,
                     msg: lec.msg,
                     req: lec.req,
-                    tip: lec.tip || "개념 설명을 다시 읽고 실습 코드를 작성해 보세요!"
+                    guide: lec.guide
                 };
             } else {
-                let customIndex = currentStage - baseLectures.length - 1;
+                let customIndex = currentStage - activeCourses.length - 1;
                 if (customIndex < customStagesList.length) {
                     let cs = customStagesList[customIndex];
                     currentMission = {
@@ -367,21 +368,22 @@
                         lectureText: cs.lecture,
                         msg: cs.msg,
                         req: cs.reqs,
-                        tip: "추가 출제된 실습 문제입니다."
+                        guide: cs.tip
                     };
                 } else {
                     currentMission = {
-                        title: "🎉 80분 정규 강의 완강!",
-                        lectureText: "모든 강의와 실습 과정을 훌륭하게 완수하셨습니다! 이제 동아리 코드 공유 스튜디오에서 친구들과 웹페이지를 자랑해 보세요.",
-                        msg: "<b>[완강 축하]</b> 모든 과정을 멋지게 수료했습니다!",
+                        title: "🎉 해당 분야 정규 완강!",
+                        lectureText: "선택하신 진로 분야의 모든 강의 과정을 훌륭하게 완수하셨습니다!",
+                        msg: "<b>[완강 축하]</b> 멋지게 수료하셨습니다!",
                         req: [],
-                        tip: "수고하셨습니다!"
+                        guide: "수고하셨습니다!"
                     };
                 }
             }
 
             document.getElementById("lec-title").innerText = currentMission.title;
             document.getElementById("lec-body").innerHTML = currentMission.lectureText + "<br><br>" + currentMission.msg;
+            document.getElementById("lec-guide").innerHTML = currentMission.guide;
         }
 
         async function checkCode() {
@@ -395,19 +397,17 @@
             if (pass) {
                 stopLectureVoice();
                 fb.style.color = "#00ffcc";
-                fb.innerText = "실습 성공! 다음 강의로 진도가 저장됩니다...";
-                
+                fb.innerText = "실습 성공! 진도가 저장됩니다...";
                 if (currentUser) {
                     await fetch('/api/progress', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: currentUser, stage: currentStage + 1 })
                     });
                 }
-
                 setTimeout(() => { currentStage++; loadTrainingStage(); }, 1500);
             } else {
                 fb.style.color = "#ff0055";
-                fb.innerText = "앗, 강의 내용을 참고하여 실습 코드를 다시 작성해보세요!";
+                fb.innerText = "앗, 가이드의 올바른 작성 예시를 참고하여 다시 작성해보세요!";
             }
         }
 
@@ -422,22 +422,13 @@
 
         function jumpToStage() {
             let val = parseInt(document.getElementById("target-stage-input").value);
-            if (val && val > 0) {
-                currentStage = val;
-                closeStageModal();
-                loadTrainingStage();
-            } else {
-                alert("올바른 강의 번호를 입력하세요!");
-            }
+            if (val && val > 0) { currentStage = val; closeStageModal(); loadTrainingStage(); }
+            else { alert("올바른 번호를 입력하세요!"); }
         }
 
         function checkLoginStatus() {
             stopLectureVoice();
-            if (currentUser) {
-                showBoardScreen(currentUser);
-            } else {
-                changeScreen('login');
-            }
+            if (currentUser) { showBoardScreen(currentUser); } else { changeScreen('login'); }
         }
 
         async function processSignup() {
@@ -448,8 +439,7 @@
                 body: JSON.stringify({ id, pw })
             });
             let data = await res.json();
-            if (data.success) { alert("가입 완료!"); changeScreen('login'); }
-            else { alert(data.msg); }
+            if (data.success) { alert("가입 완료!"); changeScreen('login'); } else { alert(data.msg); }
         }
 
         async function processLogin() {
@@ -460,11 +450,8 @@
                 body: JSON.stringify({ id, pw })
             });
             let data = await res.json();
-            if (data.success) {
-                currentUser = id;
-                localStorage.setItem("active_user", id);
-                showBoardScreen(id);
-            } else { alert("로그인 실패"); }
+            if (data.success) { currentUser = id; localStorage.setItem("active_user", id); showBoardScreen(id); }
+            else { alert("로그인 실패"); }
         }
 
         function showBoardScreen(user) {
@@ -572,8 +559,7 @@
                 body: JSON.stringify({ id: currentUser, currentPw, newPw })
             });
             let data = await res.json();
-            if (data.success) { alert("변경 완료"); openChangePwModal(); }
-            else { alert(data.msg); }
+            if (data.success) { alert("변경 완료"); openChangePwModal(); } else { alert(data.msg); }
         }
 
         function showQrCode() {
