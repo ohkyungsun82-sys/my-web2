@@ -7,11 +7,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 데이터 영구 저장을 위한 파일 경로 설정
 const USERS_FILE = path.join(__dirname, 'users.json');
 const POSTS_FILE = path.join(__dirname, 'posts.json');
+const PROGRESS_FILE = path.join(__dirname, 'progress.json');
 
-// 파일에서 데이터 불러오기 함수
 function loadData(file, defaultData) {
     if (fs.existsSync(file)) {
         try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { return defaultData; }
@@ -19,13 +18,13 @@ function loadData(file, defaultData) {
     return defaultData;
 }
 
-// 파일에 데이터 저장하기 함수
 function saveData(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
 }
 
 let users = loadData(USERS_FILE, { "admin": "1234" });
 let posts = loadData(POSTS_FILE, []);
+let progress = loadData(PROGRESS_FILE, {}); // 유저별 최고 클리어 스테이지 저장
 
 app.post('/api/signup', (req, res) => {
     const { id, pw } = req.body;
@@ -56,6 +55,22 @@ app.post('/api/password', (req, res) => {
     }
 });
 
+// 진도율 불러오기
+app.get('/api/progress/:id', (req, res) => {
+    const userId = req.params.id;
+    res.json({ maxStage: progress[userId] || 1 });
+});
+
+// 진도율 저장하기
+app.post('/api/progress', (req, res) => {
+    const { id, stage } = req.body;
+    if (!progress[id] || stage > progress[id]) {
+        progress[id] = stage;
+        saveData(PROGRESS_FILE, progress);
+    }
+    res.json({ success: true });
+});
+
 app.get('/api/users', (req, res) => {
     res.json(users);
 });
@@ -64,8 +79,10 @@ app.delete('/api/users/:id', (req, res) => {
     const targetId = req.params.id;
     if (targetId.toLowerCase() !== 'admin') {
         delete users[targetId];
+        delete progress[targetId];
         posts = posts.filter(p => p.author !== targetId);
         saveData(USERS_FILE, users);
+        saveData(PROGRESS_FILE, progress);
         saveData(POSTS_FILE, posts);
         res.json({ success: true });
     } else {

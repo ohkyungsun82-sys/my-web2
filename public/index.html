@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 코드 공유 스튜디오 (AI 훈련소 포함)</title>
+    <title>사이버 탐구 & 코드 공유 스튜디오 (무한 스테이지 선택판)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -47,17 +47,20 @@
 
     <div id="app-container">
         <div class="title">사이버 탐구 & 코드 공유 스튜디오</div>
-        <div class="subtitle">AI 무한 훈련소 & 실시간 데이터 저장 플랫폼</div>
+        <div class="subtitle">무한 스테이지 선택 및 서버 저장 플랫폼</div>
 
         <div id="main-menu-screen" class="screen active">
-            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (AI 스테이지 포함)</button>
+            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (스테이지 선택 가능)</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
         </div>
 
+        <!-- 훈련소 화면 -->
         <div id="training-screen" class="screen">
             <div class="header">
                 <div class="stage-badge" id="stage-display">STAGE 1</div>
-                <div style="color:#00ffcc; font-weight:bold;">HTML</div>
+                <div>
+                    <button onclick="openStageSelectModal()" style="background:#00ffcc; color:#000; border:none; padding:4px 8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">📌 스테이지 선택</button>
+                </div>
             </div>
             <div class="npc-box">
                 <div style="font-size:35px; margin-right:12px;">🤖</div>
@@ -124,6 +127,17 @@
         </div>
     </div>
 
+    <!-- 스테이지 선택 모달 -->
+    <div id="stage-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#00ffcc; margin-top:0;">📌 원하는 스테이지 선택</h3>
+            <p style="font-size:12px; color:#aaa;">이동하고 싶은 스테이지 번호를 입력하세요!</p>
+            <input type="number" id="target-stage-input" min="1" value="1" style="text-align:center; font-size:18px;">
+            <button class="action-btn" onclick="jumpToStage()" style="padding:8px; font-size:14px; margin-bottom:5px;">이동하기</button>
+            <button class="action-btn sub-btn" onclick="closeStageModal()" style="padding:8px; font-size:14px;">닫기</button>
+        </div>
+    </div>
+
     <div id="preview-modal" class="modal">
         <div class="modal-content">
             <h3 id="modal-title" style="color:#00ffcc; margin-top:0; font-size:16px;">미리보기</h3>
@@ -144,7 +158,7 @@
         let currentUser = localStorage.getItem("active_user") || null;
         let autoRefreshInterval = null;
 
-        window.onload = function() {
+        window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const qrUser = urlParams.get('qr');
             if (qrUser) {
@@ -169,7 +183,7 @@
             changeScreen('main-menu');
         }
 
-        // [코딩 공부 훈련소 및 AI 스테이지 로직]
+        // [코딩 공부 훈련소 및 무한 AI 스테이지 로직]
         const baseTrainingData = [
             { msg: "가장 큰 제목을 만들어보자!<br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Hello</span>를 적어봐.", req: ["<h1>", "Hello", "</h1>"], tip: "💡 **&lt;h1&gt;이란?** 가장 커다란 제목 글자를 만들 때 쓰는 태그야." },
             { msg: "누를 수 있는 버튼을 만들자!<br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 써봐.", req: ["<button>", "</button>"], tip: "💡 **태그란?** 컴퓨터에게 버튼을 만들어달라고 명령하는 상자야." },
@@ -180,9 +194,17 @@
         let currentStage = 1;
         let currentMission = {};
 
-        function openTraining() {
+        async function openTraining() {
             changeScreen('training');
-            currentStage = 1;
+            if (currentUser) {
+                try {
+                    let res = await fetch(`/api/progress/${currentUser}`);
+                    let data = await res.json();
+                    currentStage = data.maxStage || 1;
+                } catch(e) { currentStage = 1; }
+            } else {
+                currentStage = 1;
+            }
             loadTrainingStage();
         }
 
@@ -194,13 +216,12 @@
             if (currentStage <= baseTrainingData.length) {
                 currentMission = baseTrainingData[currentStage - 1];
             } else {
-                // 🤖 5스테이지 이후부터 AI가 자동으로 무한 미션 생성!
-                const words = ["Club", "Student", "Hacker", "Cyber", "Study", "Coding", "Web"];
+                const words = ["Club", "Student", "Hacker", "Cyber", "Study", "Coding", "Web", "System"];
                 let randomWord = words[Math.floor(Math.random() * words.length)] + currentStage;
                 currentMission = {
-                    msg: `🤖 <span style='color:#00ffcc;'>[AI 무한 생성 미션]</span><br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그로 <span style='color:#ff0055;'>${randomWord}</span>를 출력해봐!`,
+                    msg: `🤖 <span style='color:#00ffcc;'>[AI 무한 스테이지 ${currentStage}]</span><br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그로 <span style='color:#ff0055;'>${randomWord}</span>를 출력해봐!`,
                     req: ["<h1>", randomWord, "</h1>"],
-                    tip: `💡 **AI 튜터 힌트:** 앞서 배운 대로 <span style='color:#ff0055;'>&lt;h1&gt;${randomWord}&lt;/h1&gt;</span> 형태로 코드를 작성해봐!`
+                    tip: `💡 **AI 튜터 힌트:** <span style='color:#ff0055;'>&lt;h1&gt;${randomWord}&lt;/h1&gt;</span> 형태로 작성해보세요!`
                 };
             }
 
@@ -208,7 +229,7 @@
             document.getElementById("tip-display").innerHTML = currentMission.tip;
         }
 
-        function checkCode() {
+        async function checkCode() {
             let code = document.getElementById("code-input").value;
             let pass = true;
             for (let i = 0; i < currentMission.req.length; i++) {
@@ -217,11 +238,39 @@
             let fb = document.getElementById("feedback");
             if (pass) {
                 fb.style.color = "#00ffcc";
-                fb.innerText = "미션 성공! 다음 스테이지로 이동합니다...";
-                setTimeout(() => { currentStage++; loadTrainingStage(); }, 2000);
+                fb.innerText = "미션 성공! 서버에 기록 저장 중...";
+                
+                if (currentUser) {
+                    await fetch('/api/progress', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: currentUser, stage: currentStage + 1 })
+                    });
+                }
+
+                setTimeout(() => { currentStage++; loadTrainingStage(); }, 1500);
             } else {
                 fb.style.color = "#ff0055";
-                fb.innerText = "앗, 힌트를 다시 확인하고 코드를 고쳐보세요!";
+                fb.innerText = "앗, 코드를 다시 확인해보세요!";
+            }
+        }
+
+        function openStageSelectModal() {
+            document.getElementById("target-stage-input").value = currentStage;
+            document.getElementById("stage-modal").style.display = "flex";
+        }
+
+        function closeStageModal() {
+            document.getElementById("stage-modal").style.display = "none";
+        }
+
+        function jumpToStage() {
+            let val = parseInt(document.getElementById("target-stage-input").value);
+            if (val && val > 0) {
+                currentStage = val;
+                closeStageModal();
+                loadTrainingStage();
+            } else {
+                alert("올바른 스테이지 번호를 입력하세요!");
             }
         }
 
