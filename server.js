@@ -10,6 +10,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const USERS_FILE = path.join(__dirname, 'users.json');
 const POSTS_FILE = path.join(__dirname, 'posts.json');
 const PROGRESS_FILE = path.join(__dirname, 'progress.json');
+const STAGES_FILE = path.join(__dirname, 'stages.json');
 
 function loadData(file, defaultData) {
     if (fs.existsSync(file)) {
@@ -25,6 +26,7 @@ function saveData(file, data) {
 let users = loadData(USERS_FILE, { "admin": "1234" });
 let posts = loadData(POSTS_FILE, []);
 let progress = loadData(PROGRESS_FILE, {});
+let customStages = loadData(STAGES_FILE, []); // 사용자가 직접 만든 스테이지 목록
 
 app.post('/api/signup', (req, res) => {
     const { id, pw } = req.body;
@@ -66,6 +68,18 @@ app.post('/api/progress', (req, res) => {
         progress[id] = stage;
         saveData(PROGRESS_FILE, progress);
     }
+    res.json({ success: true });
+});
+
+// 커스텀 스테이지 불러오기/저장하기
+app.get('/api/custom-stages', (req, res) => {
+    res.json(customStages);
+});
+
+app.post('/api/custom-stages', (req, res) => {
+    const { msg, reqs, tip } = req.body;
+    customStages.push({ msg, reqs, tip });
+    saveData(STAGES_FILE, customStages);
     res.json({ success: true });
 });
 
