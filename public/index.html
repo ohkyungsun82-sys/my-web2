@@ -2,85 +2,592 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>7살도 하는 코딩 놀이터</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>말랑말랑 코딩 유치원 & 스튜디오</title>
     <style>
-        body { background: #111; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { width: 400px; background: #222; padding: 25px; border-radius: 15px; border: 2px solid #00ffcc; text-align: center; }
-        input, textarea { width: 90%; background: #000; color: #00ffcc; border: 1px solid #444; padding: 10px; margin: 5px 0; border-radius: 5px; }
-        button { background: #ff0055; color: #fff; border: none; padding: 10px 20px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; }
-        button:hover { background: #00ffcc; color: #000; }
-        .post { background: #333; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: left; }
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        #app-container { width: 90%; max-width: 750px; background: #1e1e1e; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); padding: 25px; border: 2px solid #333; box-sizing: border-box; }
+        .title { font-family: 'Black Han Sans', sans-serif; font-size: 26px; color: #00ffcc; margin-bottom: 5px; text-align: center; }
+        .subtitle { color: #aaa; margin-bottom: 20px; font-size: 13px; text-align: center; }
+        .screen { display: none; }
+        .active { display: block; }
+        .menu-btn, .action-btn { display: block; width: 100%; background: #2a2a2a; color: #fff; border: 2px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: left; }
+        .menu-btn:hover { background: #00ffcc; color: #000; border-color: #00ffcc; }
+        .box { background: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
+        input[type="text"], input[type="password"], textarea, input[type="number"] { width: 100%; background: #000; color: #00ffcc; border: 2px solid #444; border-radius: 8px; padding: 12px; font-size: 15px; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
+        input:focus, textarea:focus { outline: none; border-color: #00ffcc; }
+        .action-btn { background: #ff0055; text-align: center; font-size: 16px; margin-top: 5px; }
+        .sub-btn { background: #444; }
+        .switch-link { text-align: center; margin-top: 15px; font-size: 13px; color: #aaa; cursor: pointer; }
+        .switch-link span { color: #00ffcc; font-weight: bold; text-decoration: underline; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .stage-badge { background: #ff0055; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        
+        .lecture-card { background: #252525; border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; margin-bottom: 12px; line-height: 1.6; font-size: 14px; }
+        .lecture-title { color: #00ffcc; font-weight: bold; font-size: 17px; margin-bottom: 8px; }
+        .tts-btn { background: #00bfff; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 5px; margin-bottom: 10px; }
+        
+        .guide-box { background: #1a1a1a; border-left: 4px solid #ff0055; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 13px; color: #ffcc00; }
+        .code-example { background: #111; color: #00ffcc; padding: 8px; border-radius: 5px; font-family: monospace; margin-top: 5px; font-size: 13px; }
+
+        .user-info { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
+        .admin-badge { background: #ff0055; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .board-container { max-height: 180px; overflow-y: auto; margin-top: 15px; }
+        .post-card { background: #252525; border-left: 4px solid #00ffcc; padding: 10px; border-radius: 6px; margin-bottom: 8px; position: relative; }
+        .post-author { font-weight: bold; color: #00ffcc; font-size: 12px; margin-bottom: 3px; }
+        .post-title { font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #fff; }
+        .delete-btn { position: absolute; top: 8px; right: 8px; background: #ff4444; color: #fff; border: none; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .run-code-btn { background: #00bfff; color: #000; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 4px; }
+        .admin-panel { background: #221515; border: 1px solid #ff0055; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: #111; padding: 6px 10px; border-radius: 5px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: #1e1e1e; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; border: 2px solid #00ffcc; box-sizing: border-box; text-align: center; }
+        .preview-frame { width: 100%; height: 280px; background: #fff; border-radius: 8px; border: none; margin-top: 10px; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
-    <div class="box">
-        <h2 style="color:#00ffcc;">🎨 코딩 놀이터</h2>
-        
-        <div id="login-div">
-            <input type="text" id="user-id" placeholder="아이디 적기"><br>
-            <input type="password" id="user-pw" placeholder="비밀번호 적기"><br>
-            <button onclick="login()">입장하기</button>
+    <div id="app-container">
+        <div class="title">✨ 말랑말랑 코딩 유치원 ✨</div>
+        <div class="subtitle">선생님 목소리로 쏙쏙 배우고 친구들과 다 같이 자랑해요!</div>
+
+        <!-- 메인 메뉴 -->
+        <div id="main-menu-screen" class="screen active">
+            <button class="menu-btn" onclick="openTraining()">📖 1단계: 코딩 쏙쏙 배우러 가기</button>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 2단계: 내가 직접 문제 만들기</button>
+            <button class="menu-btn" onclick="checkLoginStatus()">💬 3단계: 친구들과 만든 웹사이트 구경하기</button>
         </div>
 
-        <div id="board-div" style="display:none;">
-            <p>안녕, <b id="my-name" style="color:#00ffcc;"></b> 친구!</p>
-            <input type="text" id="post-title" placeholder="웹페이지 제목"><br>
-            <textarea id="post-code" placeholder="<h1>내용 작성</h1>" style="height:60px;"></textarea><br>
-            <button onclick="savePost()">자랑하기</button>
-            <div id="feed" style="max-height:150px; overflow-y:auto; margin-top:10px;"></div>
-            <button onclick="location.reload()" style="background:#444; margin-top:10px;">나가기</button>
+        <!-- 강의실 화면 -->
+        <div id="training-screen" class="screen">
+            <div class="header">
+                <div class="stage-badge" id="stage-display">강의 1</div>
+                <div>
+                    <button onclick="openStageSelectModal()" style="background:#00ffcc; color:#000; border:none; padding:4px 8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">📌 다른 강의 고르기</button>
+                </div>
+            </div>
+            
+            <div class="lecture-card" id="lecture-content-box">
+                <div class="lecture-title" id="lec-title">강의 제목</div>
+                <div>
+                    <button class="tts-btn" onclick="playLectureVoice()">🔊 선생님 목소리로 들을래요</button>
+                    <button class="tts-btn" onclick="stopLectureVoice()" style="background:#444; color:#fff;">⏹ 소리 멈추기</button>
+                </div>
+                <div id="lec-body" style="margin-top:8px;">강의 설명</div>
+                <div class="guide-box" id="lec-guide">따라 쓰기 팁</div>
+            </div>
+
+            <textarea id="code-input" placeholder="여기에 예쁜 코드를 쏙 넣어보세요!" style="height:90px;"></textarea>
+            <button class="action-btn" onclick="checkCode()">🎉 다 만들었어요! (결과 확인)</button>
+            <button class="action-btn sub-btn" onclick="goHome()">🏠 처음으로 돌아가기</button>
+            <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
+        </div>
+
+        <!-- 직접 만들기 화면 -->
+        <div id="creator-screen" class="screen">
+            <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 내가 직접 선생님이 되어볼래요!</h3>
+            <input type="text" id="custom-title" placeholder="강의 이름 (예: 반짝반짝 별 만들기)" style="font-size:13px;">
+            <textarea id="custom-lecture" placeholder="[개념 설명] 친구들에게 알려줄 내용을 적어주세요." style="height:60px; font-size:13px;"></textarea>
+            <textarea id="custom-msg" placeholder="[숙제 미션] 무엇을 만들라고 할까요?" style="height:40px; font-size:13px;"></textarea>
+            <input type="text" id="custom-reqs" placeholder="꼭 들어가야 하는 글자 쉼표로 (예: &lt;h1&gt;, &lt;/h1&gt;)" style="font-size:13px;">
+            <textarea id="custom-guide" placeholder="[친절한 팁] 헷갈리지 않게 예시를 적어주세요." style="height:50px; font-size:13px;"></textarea>
+            <button class="action-btn" onclick="saveCustomStage()">내 문제 뽐내기 (등록!)</button>
+            <button class="action-btn sub-btn" onclick="goHome()">🏠 처음으로</button>
+        </div>
+
+        <!-- 로그인 화면 -->
+        <div id="login-screen" class="screen">
+            <div class="box">
+                <h3 style="margin-top:0; color:#00ffcc; text-align:center;">🔑 놀이터 문 열기 (로그인)</h3>
+                <input type="text" id="login-id" placeholder="내 이름 (아이디)">
+                <input type="password" id="login-pw" placeholder="비밀번호">
+                <button class="action-btn" onclick="processLogin()">문 열고 들어가기</button>
+                <div class="switch-link" onclick="changeScreen('signup')">처음 왔나요? <span>이름표 만들기(회원가입)</span></div>
+                <button class="action-btn sub-btn" onclick="goHome()">처음으로</button>
+            </div>
+        </div>
+
+        <!-- 회원가입 화면 -->
+        <div id="signup-screen" class="screen">
+            <div class="box">
+                <h3 style="margin-top:0; color:#00ffcc; text-align:center;">🏷️ 예쁜 이름표 만들기</h3>
+                <input type="text" id="signup-id" placeholder="사용할 아이디 적기">
+                <input type="password" id="signup-pw" placeholder="비밀번호 적기">
+                <button class="action-btn" onclick="processSignup()">이름표 찰칵! (가입 완료)</button>
+                <div class="switch-link" onclick="changeScreen('login')">이미 이름표가 있어요? <span>로그인하기</span></div>
+                <button class="action-btn sub-btn" onclick="goHome()">처음으로</button>
+            </div>
+        </div>
+
+        <!-- 게시판 화면 -->
+        <div id="board-screen" class="screen">
+            <div class="user-info">
+                <div>내 이름: <b id="display-user" style="color:#00ffcc;"></b> <span id="badge-area"></span></div>
+                <div>
+                    <button onclick="openChangePwModal()" style="background:none; border:none; color:#00ffcc; cursor:pointer; font-size:11px; margin-right:3px;">비번바꾸기</button>
+                    <button onclick="showQrCode()" style="background:none; border:none; color:#00ffcc; cursor:pointer; font-size:11px; margin-right:3px;">QR로그인</button>
+                    <button onclick="processLogout()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:11px;">퇴장하기</button>
+                </div>
+            </div>
+
+            <div id="pw-change-box" style="display:none; background:#252525; padding:10px; border-radius:8px; margin-bottom:10px;">
+                <input type="password" id="current-pw-input" placeholder="원래 비밀번호" style="margin-bottom:5px; font-size:12px; padding:7px;">
+                <input type="password" id="new-pw-input" placeholder="새 비밀번호" style="margin-bottom:5px; font-size:12px; padding:7px;">
+                <button class="action-btn" onclick="updatePassword()" style="padding:6px; font-size:12px;">바꾸기 꾹!</button>
+            </div>
+
+            <input type="text" id="code-title" placeholder="내가 만든 웹페이지 이름" style="margin-bottom:6px; padding:8px; font-size:13px;">
+            <textarea id="html-code-input" placeholder="여기에 내 웹사이트 코드를 쏙 넣어주세요!" style="height:70px; margin-bottom:6px;"></textarea>
+            <button class="action-btn" onclick="shareCode()" style="padding:8px; font-size:14px;">친구들에게 자랑하기 🚀</button>
+
+            <div style="margin-top:12px; font-size:13px; font-weight:bold; color:#00ffcc;">🌍 친구들이 실시간으로 올린 웹사이트 구경하기</div>
+            <div class="board-container" id="posts-container"></div>
+
+            <div id="admin-control-panel" class="admin-panel" style="display:none;">
+                <div style="font-weight:bold; color:#ff0055; margin-bottom:6px;">⚙️ 선생님(관리자) 메뉴</div>
+                <div id="user-list-container"></div>
+            </div>
+            
+            <button class="action-btn sub-btn" onclick="goHome()" style="font-size:12px; padding:5px; margin-top:10px;">처음으로</button>
+        </div>
+    </div>
+
+    <!-- 강의 고르기 모달 -->
+    <div id="stage-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#00ffcc; margin-top:0;">📌 몇 번째 강의로 갈까요?</h3>
+            <p style="font-size:12px; color:#aaa;">숫자를 쏙 적어주세요!</p>
+            <input type="number" id="target-stage-input" min="1" value="1" style="text-align:center; font-size:18px;">
+            <button class="action-btn" onclick="jumpToStage()" style="padding:8px; font-size:14px; margin-bottom:5px;">이동하기 슝!</button>
+            <button class="action-btn sub-btn" onclick="closeStageModal()" style="padding:8px; font-size:14px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title" style="color:#00ffcc; margin-top:0; font-size:16px;">미리보기</h3>
+            <iframe class="preview-frame" id="preview-frame"></iframe>
+            <button class="action-btn" onclick="closePreview()" style="margin-top:10px; padding:8px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#00ffcc; margin-top:0;">QR 코드로 찰칵! 로그인</h3>
+            <div id="qrcode-box" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:10px; border-radius:8px;"></div>
+            <button class="action-btn" onclick="closeQrModal()" style="padding:8px; font-size:14px;">닫기</button>
         </div>
     </div>
 
     <script>
-        let myName = "";
+        let currentUser = localStorage.getItem("active_user") || null;
+        let autoRefreshInterval = null;
 
-        async function login() {
-            let id = document.getElementById("user-id").value;
-            let pw = document.getElementById("user-pw").value;
-            if(!id) return alert("아이디를 적어주세요!");
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const qrUser = urlParams.get('qr');
+            if (qrUser) {
+                currentUser = qrUser;
+                localStorage.setItem("active_user", qrUser);
+                alert(`QR 코드로 '${qrUser}' 계정 쏙 들어왔어요!`);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        };
 
-            // 회원가입 시도 후 로그인
-            await fetch('/api/signup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id, pw}) });
-            let res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id, pw}) });
-            let data = await res.json();
-
-            if(data.success) {
-                myName = id;
-                document.getElementById("login-div").style.display = "none";
-                document.getElementById("board-div").style.display = "block";
-                document.getElementById("my-name").innerText = myName;
-                getPosts();
-                setInterval(getPosts, 3000); // 3초마다 친구들 글 자동 새로고침!
-            } else {
-                alert("비밀번호가 틀렸어요!");
+        function changeScreen(name) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(name + '-screen').classList.add('active');
+            stopLectureVoice();
+            if (name !== 'board' && autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
             }
         }
 
-        async function savePost() {
-            let title = document.getElementById("post-title").value;
-            let code = document.getElementById("post-code").value;
-            if(!title || !code) return alert("제목과 코드를 다 적어주세요!");
+        function goHome() {
+            stopLectureVoice();
+            document.getElementById("pw-change-box").style.display = "none";
+            changeScreen('main-menu');
+        }
+
+        function playLectureVoice() {
+            if (!('speechSynthesis' in window)) { alert("소리를 들을 수 없는 브라우저예요."); return; }
+            window.speechSynthesis.cancel();
+            let title = document.getElementById("lec-title").innerText;
+            let body = document.getElementById("lec-body").innerText;
+            let utterance = new SpeechSynthesisUtterance(title + ". " + body);
+            utterance.lang = 'ko-KR';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopLectureVoice() {
+            if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
+        }
+
+        // 친절한 7살 눈높이 10개 강의 커리큘럼 (닫는 태그 실수 방지 가이드 포함!)
+        const baseLectures = [
+            {
+                title: "1강. 세상에서 가장 큰 제목 적어보기",
+                lecture: "웹사이트 맨 위에 커다랗게 제목을 쓸 때는 영단어 h1을 사용해요. 상자를 열었으면 끝날 때 반드시 슬래시(/)를 넣어서 닫아주어야 컴퓨터가 헷갈리지 않아요!",
+                msg: "<b>[숙제]</b> &lt;h1&gt;을 열고 'Hello Web'을 쓴 뒤, 반드시 &lt;/h1&gt;으로 닫아주세요!",
+                req: ["<h1>", "Hello Web", "</footer>" == null ? "</h1>" : "</h1>"],
+                guide: "💡 <b>이렇게 쓰면 성공! (닫을 때 꼭 /를 넣어요)</b><div class='code-example'>&lt;h1&gt;Hello Web&lt;/h1&gt;</div>"
+            },
+            {
+                title: "2강. 예쁜 부제목과 본문 글자 남기기",
+                lecture: "조금 작은 제목은 h2, 일반적인 글자는 p 태그를 사용해요. 잊지 마세요, 끝낼 때는 항상 슬래시(/)를 쏙 넣어주세요!",
+                msg: "<b>[숙제]</b> &lt;h2&gt;소개&lt;/h2&gt;와 &lt;p&gt;안녕&lt;/p&gt;을 각각 적어보세요.",
+                req: ["<h2>", "소개", "</h2>", "<p>", "안녕", "</p>"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;소개&lt;/h2&gt;<br>&lt;p&gt;안녕&lt;/p&gt;</div>"
+            },
+            {
+                title: "3강. 꾹 누를 수 있는 마법의 버튼 만들기",
+                lecture: "마우스로 꾹 누르면 반응하는 버튼을 만들고 싶을 때는 button 태그를 써요.",
+                msg: "<b>[숙제]</b> &lt;button&gt; 사이에 '시작하기'를 적어보세요.",
+                req: ["<button>", "시작하기", "</button>"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;시작하기&lt;/button&gt;</div>"
+            },
+            {
+                title: "4강. 글자를 칠 수 있는 네모 빈 칸 만들기",
+                lecture: "사용자가 글자를 칠 수 있는 네모 칸을 만들어요. input은 신기하게도 닫는 태그가 없답니다!",
+                msg: "<b>[숙제]</b> 네모 칸을 만드는 &lt;input&gt; 태그를 적어보세요.",
+                req: ["<input>"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;input&gt;</div><small style='color:#aaa;'>※ input은 닫지 않아도 괜찮아요!</small>"
+            },
+            {
+                title: "5강. 다른 곳으로 점프하는 링크 만들기",
+                lecture: "인터넷 주소로 이동하는 문을 만들 때는 a 태그와 href 속성을 함께 씁니다.",
+                msg: "<b>[숙제]</b> &lt;a href=&quot;주소&quot;&gt; 링크 태그를 작성해보세요.",
+                req: ["<a", "href="],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;a href=&quot;https://naver.com&quot;&gt;네이버로 점프&lt;/a&gt;</div>"
+            },
+            {
+                title: "6강. 반짝반짝 예쁜 사진 띄우기",
+                lecture: "웹사이트에 멋진 그림이나 사진을 띄울 때는 img src 태그를 사용해요.",
+                msg: "<b>[숙제]</b> &lt;img src=&quot;그림주소&quot;&gt; 태그를 적어보세요.",
+                req: ["<img", "src="],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;img src=&quot;picture.jpg&quot;&gt;</div>"
+            },
+            {
+                title: "7강. 동그란 점으로 예쁘게 목록 만들기",
+                lecture: "항목들을 동그란 점 모양으로 착착 정리할 때는 ul과 li 태그를 함께 씁니다.",
+                msg: "<b>[숙제]</b> &lt;ul&gt;과 &lt;li&gt; 태그를 써서 목록을 만들어보세요.",
+                req: ["<ul>", "<li>", "</li>", "</ul>"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;ul&gt;<br>&nbsp;&nbsp;&lt;li&gt;사과&lt;/li&gt;<br>&nbsp;&nbsp;&lt;li&gt;바나나&lt;/li&gt;<br>&lt;/ul&gt;</div>"
+            },
+            {
+                title: "8강. 알록달록 무지개 색상 입히기",
+                lecture: "글자에 예쁜 색을 칠하고 싶을 때는 style='color: 색상;' 속성을 넣어봐요.",
+                msg: "<b>[숙제]</b> style 속성으로 글자에 색상을 입혀보세요.",
+                req: ["style=", "color:"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1 style=&quot;color: red;&quot;&gt;빨간 제목&lt;/h1&gt;</div>"
+            },
+            {
+                title: "9강. 네모 상자에 배경색 칠하기",
+                lecture: "상자나 웹페이지 전체 배경에 색을 넣고 싶을 때는 background-color를 써요.",
+                msg: "<b>[숙제]</b> background-color 속성을 포함한 코드를 작성해보세요.",
+                req: ["background-color"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;div style=&quot;background-color: yellow;&quot;&gt;노란 상자&lt;/div&gt;</div>"
+            },
+            {
+                title: "10강. 최종 축하 파티: 나만의 멋진 웹사이트 완성!",
+                lecture: "와! 벌써 마지막이에요. 지금까지 배운 제목과 버튼을 합쳐서 나만의 멋진 웹사이트를 완성해 보세요!",
+                msg: "<b>[숙제]</b> 제목(&lt;h1&gt;)과 버튼(&lt;button&gt;)을 모두 넣어서 완성해 보세요!",
+                req: ["<h1>", "<button>"],
+                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;내 홈페이지&lt;/h1&gt;<br>&lt;button&gt;구경하기&lt;/button&gt;</div>"
+            }
+        ];
+
+        let currentStage = 1;
+        let currentMission = {};
+        let customStagesList = [];
+
+        function openStageCreator() {
+            stopLectureVoice();
+            changeScreen('creator');
+        }
+
+        async function saveCustomStage() {
+            let title = document.getElementById("custom-title").value.trim();
+            let lecture = document.getElementById("custom-lecture").value.trim();
+            let msg = document.getElementById("custom-msg").value.trim();
+            let reqsStr = document.getElementById("custom-reqs").value.trim();
+            let guide = document.getElementById("custom-guide").value.trim();
+
+            if (!title || !lecture || !msg || !reqsStr) {
+                alert("빈 칸을 모두 채워주세요!");
+                return;
+            }
+
+            let reqs = reqsStr.split(',').map(s => s.trim());
+
+            await fetch('/api/custom-stages', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, lecture, msg, reqs, tip: guide || "작성 팁을 참고하세요." })
+            });
+
+            alert("내 문제가 멋지게 등록되었어요!");
+            goHome();
+        }
+
+        async function openTraining() {
+            changeScreen('training');
+            try {
+                let res = await fetch('/api/custom-stages');
+                customStagesList = await res.json();
+            } catch(e) { customStagesList = []; }
+
+            if (currentUser) {
+                try {
+                    let res = await fetch(`/api/progress/${currentUser}`);
+                    let data = await res.json();
+                    currentStage = data.maxStage || 1;
+                } catch(e) { currentStage = 1; }
+            } else {
+                currentStage = 1;
+            }
+            loadTrainingStage();
+        }
+
+        function loadTrainingStage() {
+            stopLectureVoice();
+            document.getElementById("stage-display").innerText = "강의 " + currentStage;
+            document.getElementById("code-input").value = "";
+            document.getElementById("feedback").innerText = "";
+
+            let activeCourses = baseLectures;
+
+            if (currentStage <= activeCourses.length) {
+                let lec = activeCourses[currentStage - 1];
+                currentMission = {
+                    title: lec.title,
+                    lectureText: lec.lecture,
+                    msg: lec.msg,
+                    req: lec.req,
+                    guide: lec.guide
+                };
+            } else {
+                let customIndex = currentStage - activeCourses.length - 1;
+                if (customIndex < customStagesList.length) {
+                    let cs = customStagesList[customIndex];
+                    currentMission = {
+                        title: cs.title || `추가 강의 ${currentStage}`,
+                        lectureText: cs.lecture,
+                        msg: cs.msg,
+                        req: cs.reqs,
+                        guide: cs.tip
+                    };
+                } else {
+                    currentMission = {
+                        title: "🎉 모든 강의를 다 완수했어요!",
+                        lectureText: "정말 대단해요! 유치원 과정을 모두 멋지게 졸업하셨습니다!",
+                        msg: "<b>[졸업 축하]</b> 멋져요!",
+                        req: [],
+                        guide: "최고예요!"
+                    };
+                }
+            }
+
+            document.getElementById("lec-title").innerText = currentMission.title;
+            document.getElementById("lec-body").innerHTML = currentMission.lectureText + "<br><br>" + currentMission.msg;
+            document.getElementById("lec-guide").innerHTML = currentMission.guide;
+        }
+
+        async function checkCode() {
+            if (!currentMission.req || currentMission.req.length === 0) return;
+            let code = document.getElementById("code-input").value;
+            let pass = true;
+            for (let i = 0; i < currentMission.req.length; i++) {
+                if (!code.includes(currentMission.req[i])) { pass = false; break; }
+            }
+            let fb = document.getElementById("feedback");
+            if (pass) {
+                stopLectureVoice();
+                fb.style.color = "#00ffcc";
+                fb.innerText = "참 잘했어요! 다음 단계로 슝~ 저장 중!";
+                if (currentUser) {
+                    await fetch('/api/progress', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: currentUser, stage: currentStage + 1 })
+                    });
+                }
+                setTimeout(() => { currentStage++; loadTrainingStage(); }, 1500);
+            } else {
+                fb.style.color = "#ff0055";
+                fb.innerText = "앗, 아래 초록색 팁을 보고 슬래시(/)를 넣었는지 확인해봐요!";
+            }
+        }
+
+        function openStageSelectModal() {
+            document.getElementById("target-stage-input").value = currentStage;
+            document.getElementById("stage-modal").style.display = "flex";
+        }
+
+        function closeStageModal() {
+            document.getElementById("stage-modal").style.display = "none";
+        }
+
+        function jumpToStage() {
+            let val = parseInt(document.getElementById("target-stage-input").value);
+            if (val && val > 0) { currentStage = val; closeStageModal(); loadTrainingStage(); }
+            else { alert("올바른 숫자를 적어주세요!"); }
+        }
+
+        function checkLoginStatus() {
+            stopLectureVoice();
+            if (currentUser) { showBoardScreen(currentUser); } else { changeScreen('login'); }
+        }
+
+        async function processSignup() {
+            let id = document.getElementById("signup-id").value.trim();
+            let pw = document.getElementById("signup-pw").value.trim();
+            let res = await fetch('/api/signup', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, pw })
+            });
+            let data = await res.json();
+            if (data.success) { alert("이름표 만들기 성공! 로그인해 주세요."); changeScreen('login'); } else { alert(data.msg); }
+        }
+
+        async function processLogin() {
+            let id = document.getElementById("login-id").value.trim();
+            let pw = document.getElementById("login-pw").value.trim();
+            let res = await fetch('/api/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, pw })
+            });
+            let data = await res.json();
+            if (data.success) { currentUser = id; localStorage.setItem("active_user", id); showBoardScreen(id); }
+            else { alert(data.msg); }
+        }
+
+        function showBoardScreen(user) {
+            changeScreen('board');
+            document.getElementById("display-user").innerText = user;
+            let isAdmin = (user.toLowerCase() === 'admin');
+            document.getElementById("badge-area").innerHTML = isAdmin ? "<span class='admin-badge'>선생님</span>" : "";
+            document.getElementById("admin-control-panel").style.display = isAdmin ? "block" : "none";
+            if (isAdmin) loadUsers();
+            loadPosts();
+
+            if (!autoRefreshInterval) {
+                autoRefreshInterval = setInterval(() => {
+                    loadPosts();
+                    if (isAdmin) loadUsers();
+                }, 3000);
+            }
+        }
+
+        function processLogout() {
+            currentUser = null;
+            localStorage.removeItem("active_user");
+            if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; }
+            changeScreen('login');
+        }
+
+        async function shareCode() {
+            let title = document.getElementById("code-title").value.trim();
+            let code = document.getElementById("html-code-input").value.trim();
+            if (!title || !code) return alert("제목과 코드를 다 적어주세요!");
 
             await fetch('/api/posts', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ author: myName, title, code })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author: currentUser, title, code })
             });
-            document.getElementById("post-title").value = "";
-            document.getElementById("post-code").value = "";
-            getPosts();
+            document.getElementById("code-title").value = "";
+            document.getElementById("html-code-input").value = "";
+            loadPosts();
         }
 
-        async function getPosts() {
+        async function loadPosts() {
             let res = await fetch('/api/posts');
             let posts = await res.json();
+            let container = document.getElementById("posts-container");
+            let isAdmin = (currentUser && currentUser.toLowerCase() === 'admin');
+
+            if (posts.length === 0) { 
+                container.innerHTML = "<div style='text-align:center; color:#666; font-size:12px;'>아직 올라온 웹사이트가 없어요.</div>"; 
+                return; 
+            }
+
             let html = "";
             posts.forEach(p => {
-                html += `<div class="post"><b>${p.author}</b>: ${p.title}</div>`;
+                let canDel = isAdmin || (p.author === currentUser);
+                html += `
+                    <div class="post-card">
+                        <div class="post-author">${p.author} 친구</div>
+                        <div class="post-title">${p.title}</div>
+                        <button class="run-code-btn" onclick="runPreview('${encodeURIComponent(p.title)}', '${encodeURIComponent(p.code)}')">구경하기</button>
+                        ${canDel ? `<button class="delete-btn" onclick="deletePost(${p.id})">삭제</button>` : ''}
+                    </div>
+                `;
             });
-            document.getElementById("feed").innerHTML = html || "<small>아직 올라온 글이 없어요.</small>";
+            container.innerHTML = html;
         }
+
+        async function deletePost(id) {
+            let isAdmin = (currentUser.toLowerCase() === 'admin');
+            await fetch(`/api/posts/${id}`, {
+                method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: currentUser, isAdmin })
+            });
+            loadPosts();
+        }
+
+        async function loadUsers() {
+            let res = await fetch('/api/users');
+            let users = await res.json();
+            let container = document.getElementById("user-list-container");
+            let html = "";
+            for (let id in users) {
+                if (id.toLowerCase() !== 'admin') {
+                    html += `<div class="user-row"><span>${id} 친구</span><button onclick="deleteUser('${id}')" style="background:#ff4444; color:#fff; border:none; padding:3px;">내보내기</button></div>`;
+                }
+            }
+            container.innerHTML = html || "친구들이 없어요.";
+        }
+
+        async function deleteUser(id) {
+            await fetch(`/api/users/${id}`, { method: 'DELETE' });
+            loadUsers();
+            loadPosts();
+        }
+
+        function openChangePwModal() {
+            let box = document.getElementById("pw-change-box");
+            box.style.display = box.style.display === "none" ? "block" : "none";
+        }
+
+        async function updatePassword() {
+            let currentPw = document.getElementById("current-pw-input").value;
+            let newPw = document.getElementById("new-pw-input").value;
+            let res = await fetch('/api/password', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentUser, currentPw, newPw })
+            });
+            let data = await res.json();
+            if (data.success) { alert("비밀번호가 콩! 바뀌었어요."); openChangePwModal(); } else { alert(data.msg); }
+        }
+
+        function showQrCode() {
+            let box = document.getElementById("qrcode-box");
+            box.innerHTML = "";
+            new QRCode(box, { text: window.location.href.split('?')[0] + "?qr=" + currentUser, width: 140, height: 140 });
+            document.getElementById("qr-modal").style.display = "flex";
+        }
+
+        function closeQrModal() { document.getElementById("qr-modal").style.display = "none"; }
+        function runPreview(t, c) {
+            document.getElementById("modal-title").innerText = decodeURIComponent(t);
+            let iframe = document.getElementById("preview-frame");
+            document.getElementById("preview-modal").style.display = "flex";
+            let doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open(); doc.write(decodeURIComponent(c)); doc.close();
+        }
+        function closePreview() { document.getElementById("preview-modal").style.display = "none"; }
     </script>
 </body>
 </html>
