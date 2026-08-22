@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>말랑말랑 코딩 유치원 & 스튜디오</title>
+    <title>사이버 탐구 & 진로 맞춤형 웹개발 스튜디오</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -25,6 +25,11 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
         .stage-badge { background: #ff0055; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
         
+        /* 분야 선택 카테고리 버튼 */
+        .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .cat-btn { background: #252525; border: 2px solid #00ffcc; color: #fff; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center; font-size: 15px; transition: 0.2s; }
+        .cat-btn:hover { background: #00ffcc; color: #000; }
+
         .lecture-card { background: #252525; border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; margin-bottom: 12px; line-height: 1.6; font-size: 14px; }
         .lecture-title { color: #00ffcc; font-weight: bold; font-size: 17px; margin-bottom: 8px; }
         .tts-btn { background: #00bfff; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 5px; margin-bottom: 10px; }
@@ -52,13 +57,19 @@
 
     <div id="app-container">
         <div class="title">✨ 말랑말랑 코딩 유치원 ✨</div>
-        <div class="subtitle">선생님 목소리로 쏙쏙 배우고 친구들과 다 같이 자랑해요!</div>
+        <div class="subtitle">암호학 · 게임 개발 · 디코 봇 · 화이트 해커 (선생님 목소리로 쏙쏙!)</div>
 
         <!-- 메인 메뉴 -->
         <div id="main-menu-screen" class="screen active">
-            <button class="menu-btn" onclick="openTraining()">📖 1단계: 코딩 쏙쏙 배우러 가기</button>
-            <button class="menu-btn" onclick="openStageCreator()">✏️ 2단계: 내가 직접 문제 만들기</button>
-            <button class="menu-btn" onclick="checkLoginStatus()">💬 3단계: 친구들과 만든 웹사이트 구경하기</button>
+            <div style="color:#00ffcc; font-weight:bold; margin-bottom:10px; text-align:center;">🎯 오늘 해보고 싶은 멋진 공부를 골라봐요!</div>
+            <div class="category-grid">
+                <button class="cat-btn" onclick="selectCategory('crypto')">🔐 암호학 / 보안</button>
+                <button class="cat-btn" onclick="selectCategory('game')">🎮 게임 개발</button>
+                <button class="cat-btn" onclick="selectCategory('discord')">🤖 디스코드 봇 개발</button>
+                <button class="cat-btn" onclick="selectCategory('hacker')">🛡️ 화이트 해커</button>
+            </div>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 내가 직접 문제 만들어보기</button>
+            <button class="menu-btn" onclick="checkLoginStatus()">💬 친구들이 만든 웹사이트 구경하기</button>
         </div>
 
         <!-- 강의실 화면 -->
@@ -76,11 +87,11 @@
                     <button class="tts-btn" onclick="playLectureVoice()">🔊 선생님 목소리로 들을래요</button>
                     <button class="tts-btn" onclick="stopLectureVoice()" style="background:#444; color:#fff;">⏹ 소리 멈추기</button>
                 </div>
-                <div id="lec-body" style="margin-top:8px;">강의 설명</div>
+                <div id="lec-body" style="margin-top:8px;">강의 설명 내용</div>
                 <div class="guide-box" id="lec-guide">따라 쓰기 팁</div>
             </div>
 
-            <textarea id="code-input" placeholder="여기에 예쁜 코드를 쏙 넣어보세요!" style="height:90px;"></textarea>
+            <textarea id="code-input" placeholder="여기에 예쁜 코드를 쏙 넣어보세요! (예: &lt;h2&gt;제목&lt;/h2&gt;)" style="height:90px;"></textarea>
             <button class="action-btn" onclick="checkCode()">🎉 다 만들었어요! (결과 확인)</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 처음으로 돌아가기</button>
             <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
@@ -89,10 +100,10 @@
         <!-- 직접 만들기 화면 -->
         <div id="creator-screen" class="screen">
             <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 내가 직접 선생님이 되어볼래요!</h3>
-            <input type="text" id="custom-title" placeholder="강의 이름 (예: 반짝반짝 별 만들기)" style="font-size:13px;">
+            <input type="text" id="custom-title" placeholder="강의 이름 (예: 별 반짝이는 웹사이트 만들기)" style="font-size:13px;">
             <textarea id="custom-lecture" placeholder="[개념 설명] 친구들에게 알려줄 내용을 적어주세요." style="height:60px; font-size:13px;"></textarea>
             <textarea id="custom-msg" placeholder="[숙제 미션] 무엇을 만들라고 할까요?" style="height:40px; font-size:13px;"></textarea>
-            <input type="text" id="custom-reqs" placeholder="꼭 들어가야 하는 글자 쉼표로 (예: &lt;h1&gt;, &lt;/h1&gt;)" style="font-size:13px;">
+            <input type="text" id="custom-reqs" placeholder="꼭 들어가야 하는 글자 쉼표로 (예: &lt;h2&gt;, &lt;/h2&gt;)" style="font-size:13px;">
             <textarea id="custom-guide" placeholder="[친절한 팁] 헷갈리지 않게 예시를 적어주세요." style="height:50px; font-size:13px;"></textarea>
             <button class="action-btn" onclick="saveCustomStage()">내 문제 뽐내기 (등록!)</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 처음으로</button>
@@ -139,7 +150,7 @@
                 <button class="action-btn" onclick="updatePassword()" style="padding:6px; font-size:12px;">바꾸기 꾹!</button>
             </div>
 
-            <input type="text" id="code-title" placeholder="내가 만든 웹페이지 이름" style="margin-bottom:6px; padding:8px; font-size:13px;">
+            <input type="text" id="code-title" placeholder="내가 만든 웹사이트 이름" style="margin-bottom:6px; padding:8px; font-size:13px;">
             <textarea id="html-code-input" placeholder="여기에 내 웹사이트 코드를 쏙 넣어주세요!" style="height:70px; margin-bottom:6px;"></textarea>
             <button class="action-btn" onclick="shareCode()" style="padding:8px; font-size:14px;">친구들에게 자랑하기 🚀</button>
 
@@ -155,7 +166,7 @@
         </div>
     </div>
 
-    <!-- 강의 고르기 모달 -->
+    <!-- 강의 선택 모달 -->
     <div id="stage-modal" class="modal">
         <div class="modal-content">
             <h3 style="color:#00ffcc; margin-top:0;">📌 몇 번째 강의로 갈까요?</h3>
@@ -185,6 +196,7 @@
     <script>
         let currentUser = localStorage.getItem("active_user") || null;
         let autoRefreshInterval = null;
+        let selectedCategory = 'crypto'; // 기본 선택 분야
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -227,83 +239,66 @@
             if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
         }
 
-        // 친절한 7살 눈높이 10개 강의 커리큘럼 (닫는 태그 실수 방지 가이드 포함!)
-        const baseLectures = [
-            {
-                title: "1강. 세상에서 가장 큰 제목 적어보기",
-                lecture: "웹사이트 맨 위에 커다랗게 제목을 쓸 때는 영단어 h1을 사용해요. 상자를 열었으면 끝날 때 반드시 슬래시(/)를 넣어서 닫아주어야 컴퓨터가 헷갈리지 않아요!",
-                msg: "<b>[숙제]</b> &lt;h1&gt;을 열고 'Hello Web'을 쓴 뒤, 반드시 &lt;/h1&gt;으로 닫아주세요!",
-                req: ["<h1>", "Hello Web", "</footer>" == null ? "</h1>" : "</h1>"],
-                guide: "💡 <b>이렇게 쓰면 성공! (닫을 때 꼭 /를 넣어요)</b><div class='code-example'>&lt;h1&gt;Hello Web&lt;/h1&gt;</div>"
-            },
-            {
-                title: "2강. 예쁜 부제목과 본문 글자 남기기",
-                lecture: "조금 작은 제목은 h2, 일반적인 글자는 p 태그를 사용해요. 잊지 마세요, 끝낼 때는 항상 슬래시(/)를 쏙 넣어주세요!",
-                msg: "<b>[숙제]</b> &lt;h2&gt;소개&lt;/h2&gt;와 &lt;p&gt;안녕&lt;/p&gt;을 각각 적어보세요.",
-                req: ["<h2>", "소개", "</h2>", "<p>", "안녕", "</p>"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;소개&lt;/h2&gt;<br>&lt;p&gt;안녕&lt;/p&gt;</div>"
-            },
-            {
-                title: "3강. 꾹 누를 수 있는 마법의 버튼 만들기",
-                lecture: "마우스로 꾹 누르면 반응하는 버튼을 만들고 싶을 때는 button 태그를 써요.",
-                msg: "<b>[숙제]</b> &lt;button&gt; 사이에 '시작하기'를 적어보세요.",
-                req: ["<button>", "시작하기", "</button>"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;시작하기&lt;/button&gt;</div>"
-            },
-            {
-                title: "4강. 글자를 칠 수 있는 네모 빈 칸 만들기",
-                lecture: "사용자가 글자를 칠 수 있는 네모 칸을 만들어요. input은 신기하게도 닫는 태그가 없답니다!",
-                msg: "<b>[숙제]</b> 네모 칸을 만드는 &lt;input&gt; 태그를 적어보세요.",
-                req: ["<input>"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;input&gt;</div><small style='color:#aaa;'>※ input은 닫지 않아도 괜찮아요!</small>"
-            },
-            {
-                title: "5강. 다른 곳으로 점프하는 링크 만들기",
-                lecture: "인터넷 주소로 이동하는 문을 만들 때는 a 태그와 href 속성을 함께 씁니다.",
-                msg: "<b>[숙제]</b> &lt;a href=&quot;주소&quot;&gt; 링크 태그를 작성해보세요.",
-                req: ["<a", "href="],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;a href=&quot;https://naver.com&quot;&gt;네이버로 점프&lt;/a&gt;</div>"
-            },
-            {
-                title: "6강. 반짝반짝 예쁜 사진 띄우기",
-                lecture: "웹사이트에 멋진 그림이나 사진을 띄울 때는 img src 태그를 사용해요.",
-                msg: "<b>[숙제]</b> &lt;img src=&quot;그림주소&quot;&gt; 태그를 적어보세요.",
-                req: ["<img", "src="],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;img src=&quot;picture.jpg&quot;&gt;</div>"
-            },
-            {
-                title: "7강. 동그란 점으로 예쁘게 목록 만들기",
-                lecture: "항목들을 동그란 점 모양으로 착착 정리할 때는 ul과 li 태그를 함께 씁니다.",
-                msg: "<b>[숙제]</b> &lt;ul&gt;과 &lt;li&gt; 태그를 써서 목록을 만들어보세요.",
-                req: ["<ul>", "<li>", "</li>", "</ul>"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;ul&gt;<br>&nbsp;&nbsp;&lt;li&gt;사과&lt;/li&gt;<br>&nbsp;&nbsp;&lt;li&gt;바나나&lt;/li&gt;<br>&lt;/ul&gt;</div>"
-            },
-            {
-                title: "8강. 알록달록 무지개 색상 입히기",
-                lecture: "글자에 예쁜 색을 칠하고 싶을 때는 style='color: 색상;' 속성을 넣어봐요.",
-                msg: "<b>[숙제]</b> style 속성으로 글자에 색상을 입혀보세요.",
-                req: ["style=", "color:"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1 style=&quot;color: red;&quot;&gt;빨간 제목&lt;/h1&gt;</div>"
-            },
-            {
-                title: "9강. 네모 상자에 배경색 칠하기",
-                lecture: "상자나 웹페이지 전체 배경에 색을 넣고 싶을 때는 background-color를 써요.",
-                msg: "<b>[숙제]</b> background-color 속성을 포함한 코드를 작성해보세요.",
-                req: ["background-color"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;div style=&quot;background-color: yellow;&quot;&gt;노란 상자&lt;/div&gt;</div>"
-            },
-            {
-                title: "10강. 최종 축하 파티: 나만의 멋진 웹사이트 완성!",
-                lecture: "와! 벌써 마지막이에요. 지금까지 배운 제목과 버튼을 합쳐서 나만의 멋진 웹사이트를 완성해 보세요!",
-                msg: "<b>[숙제]</b> 제목(&lt;h1&gt;)과 버튼(&lt;button&gt;)을 모두 넣어서 완성해 보세요!",
-                req: ["<h1>", "<button>"],
-                guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;내 홈페이지&lt;/h1&gt;<br>&lt;button&gt;구경하기&lt;/button&gt;</div>"
-            }
-        ];
+        // 🛡️ [분야별 10개씩 총 40개 정밀 강의 커리큘럼 데이터 - 7살 눈높이 팁 및 예시 가이드 추가]
+        const allCourses = {
+            crypto: [
+                { title: "1강. 암호학의 기초와 대칭키 개념", lecture: "정보를 안전하게 지키는 비밀 암호의 세계를 배워봐요. 원래 글자를 알 수 없는 암호문으로 꽁꽁 숨기는 마법이에요.", msg: "[숙제] 시저 암호화 원리를 이해하기 위해 <h2> 태그를 열고 닫아보세요.", req: ["<h2>", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공! (닫을 때 꼭 /를 넣어요)</b><div class='code-example'>&lt;h2&gt;Caesar Cipher&lt;/h2&gt;</div>" },
+                { title: "2강. 카이사르(시저) 암호 알고리즘", lecture: "알파벳을 빙글빙글 밀어서 다른 글자로 바꾸는 아주 옛날 비밀 편지 기법이에요.", msg: "[숙제] shift라는 글자가 들어가게 <p> 태그를 만들어보세요.", req: ["<p>", "shift", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;shift 3&lt;/p&gt;</div>" },
+                { title: "3강. 해시(Hash) 함수의 이해와 무결성", lecture: "긴 글자를 고정된 짧은 암호 상자로 쏙 집어넣는 단방향 마법 상자예요.", msg: "[숙제] SHA-256 글자가 들어간 <h3> 태그를 적어보세요.", req: ["<h3>", "SHA", "</h3>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h3&gt;SHA-256&lt;/h3&gt;</div>" },
+                { title: "4강. 대칭키 암호화(AES)의 원리", lecture: "상자를 잠그는 열쇠와 여는 열쇠가 똑같은 든든한 비밀 열쇠 방식이에요.", msg: "[숙제] AES-128 버튼을 만들어보세요.", req: ["<button>", "AES", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;AES-128&lt;/button&gt;</div>" },
+                { title: "5강. 비대칭키 암호화(공개키/개인키)", lecture: "자물쇠는 아무나 채우지만, 열쇠는 나만 가지고 있는 신기한 공개키 시스템이에요.", msg: "[숙제] PublicKey 링크 태그를 작성해보세요.", req: ["<a", "PublicKey"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;a href='#'&gt;PublicKey&lt;/a&gt;</div>" },
+                { title: "6강. RSA 암호 알고리즘 실습", lecture: "어마어마하게 큰 소수를 곱해서 절대 풀 수 없게 만드는 멋진 암호예요.", msg: "[숙제] <h1> 태그로 RSA 알고리즘 이름을 적어보세요.", req: ["<h1>", "RSA", "</h1>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;RSA Algorithm&lt;/h1&gt;</div>" },
+                { title: "7강. 디지털 서명과 인증서", lecture: "진짜 내가 보낸 편지라는 걸 쾅쾅 도장 찍어주는 전자 도장이에요.", msg: "[숙제] Signature 문단을 만들어보세요.", req: ["<p>", "Signature", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;Digital Signature&lt;/p&gt;</div>" },
+                { title: "8강. 블록체인과 암호학의 만남", lecture: "블록 기차처럼 글자들을 단단하게 엮어서 절대 훔쳐 갈 수 없게 만드는 기술이에요.", msg: "[숙제] Block 글자가 들어간 버튼을 만들어보세요.", req: ["<button>", "Block", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Block&lt;/button&gt;</div>" },
+                { title: "9강. 양자 암호와 미래 보안", lecture: "엄청나게 빠른 미래의 슈퍼 컴퓨터도 절대 못 깨는 최강의 암호예요.", msg: "[숙제] Quantum 글자를 <h2>로 적어보세요.", req: ["<h2>", "Quantum", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;Quantum&lt;/h2&gt;</div>" },
+                { title: "10강. 최종 프로젝트: 나만의 암호 해독기 웹페이지", lecture: "와! 벌써 마지막이에요. 지금까지 배운 암호 지식을 모아 멋진 암호 웹사이트를 완성해봐요!", msg: "[숙제] 제목과 암호화 버튼을 함께 넣어서 코드를 완성해 보세요!", req: ["<h1>", "<button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;Crypto Tool&lt;/h1&gt;<br>&lt;button&gt;Encrypt&lt;/button&gt;</div>" }
+            ],
+            game: [
+                { title: "1강. 게임 개발의 기초와 HTML5 Canvas", lecture: "화면 위에 그림을 그리고 게임을 뚝딱 만들어내는 도화지 태그를 배워봐요.", msg: "[숙제] 그림을 그리는 <canvas> 태그를 적어보세요.", req: ["<canvas>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;canvas id='gameCanvas'&gt;&lt;/canvas&gt;</div>" },
+                { title: "2강. 게임 루프(Game Loop)와 렌더링", lecture: "화면을 엄청나게 빠른 속도로 깜빡이게 만들어서 캐릭터를 살아 움직이게 해요.", msg: "[숙제] GameLoop 글자를 <h2>로 적어보세요.", req: ["<h2>", "GameLoop", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;GameLoop&lt;/h2&gt;</div>" },
+                { title: "3강. 2D 좌표계와 플레이어 캐릭터 생성", lecture: "가로(X), 세로(Y) 좌표를 콕 찍어서 내 주인공 캐릭터를 화면에 짠! 나타내요.", msg: "[숙제] Player 버튼을 만들어보세요.", req: ["<button>", "Player", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Spawn Player&lt;/button&gt;</div>" },
+                { title: "4강. 키보드 입력 이벤트 처리 (WASD)", lecture: "키보드 방향키나 버튼을 꾹 누르면 주인공이 슝슝 움직이게 만들어봐요.", msg: "[숙제] KeyDown 문단을 작성해 보세요.", req: ["<p>", "KeyDown", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;KeyDown Event&lt;/p&gt;</div>" },
+                { title: "5강. 물리 엔진과 중력(Gravity) 구현", lecture: "점프를 하면 다시 아래로 뚝 떨어지게 만드는 신나는 중력 마법이에요.", msg: "[숙제] Gravity 설정을 <h3>로 적어보세요.", req: ["<h3>", "Gravity", "</h3>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h3&gt;Gravity&lt;/h3&gt;</div>" },
+                { title: "6강. 충돌 검출(Collision Detection) 알고리즘", lecture: "주인공과 무서운 장애물이 콩! 부딪혔는지 알아채는 똑똑한 눈이에요.", msg: "[숙제] Collision 검출 버튼을 만들어보세요.", req: ["<button>", "Collision", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Check Collision&lt;/button&gt;</div>" },
+                { title: "7강. 점수 시스템과 UI 오버레이", lecture: "게임을 할 때마다 반짝반짝 올라가는 멋진 내 점수판을 만들어봐요.", msg: "[숙제] Score 글자를 <h1>으로 적어보세요.", req: ["<h1>", "Score", "</h1>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;Score: 0&lt;/h1&gt;</div>" },
+                { title: "8강. 적(Enemy) AI와 스폰 메커니즘", lecture: "자꾸만 내 뒤를 졸졸 쫓아오는 무서운 적들을 짠 하고 소환해 봐요.", msg: "[숙제] Enemy 문단을 만들어보세요.", req: ["<p>", "Enemy", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;Enemy Spawn&lt;/p&gt;</div>" },
+                { title: "9강. 사운드 효과와 배경음악(BGM) 추가", lecture: "게임할 때 신나는 음악이 둥둥 울리도록 소리 상자를 켜봐요.", msg: "[숙제] Audio 버튼을 만들어보세요.", req: ["<button>", "Audio", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Play BGM&lt;/button&gt;</div>" },
+                { title: "10강. 최종 프로젝트: 웹 아케이드 미니게임 완성", lecture: "와! 배운 모든 걸 합쳐서 세상에 단 하나뿐인 내 미니게임을 완성했어요!", msg: "[숙제] 게임 제목과 시작 버튼을 넣어서 완성해 보세요!", req: ["<h1>", "<button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;Mini Game&lt;/h1&gt;<br>&lt;button&gt;Start Game&lt;/button&gt;</div>" }
+            ],
+            discord: [
+                { title: "1강. 디스코드 봇 개발 환경 세팅과 Node.js", lecture: "내 말을 척척 알아듣는 똑똑한 디스코드 로봇 친구를 데려오는 첫걸음이에요.", msg: "[숙제] Discord.js 문단을 작성해 보세요.", req: ["<p>", "Discord.js", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;Discord.js Bot&lt;/p&gt;</div>" },
+                { title: "2강. 봇 토큰(Token)과 보안 관리", lecture: "로봇 친구의 신분증이자 절대 남에게 들키면 안 되는 비밀 열쇠예요.", msg: "[숙제] Token 글자를 <h2>로 적어보세요.", req: ["<h2>", "Token", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;Bot Token&lt;/h2&gt;</div>" },
+                { title: "3강. 메시지 이벤트 감지 (Ping-Pong 봇)", lecture: "친구가 '핑!' 하고 말을 걸면 로봇이 '퐁!' 하고 대답하게 만들어봐요.", msg: "[숙제] Ping 버튼을 만들어보세요.", req: ["<button>", "Ping", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Ping-Pong&lt;/button&gt;</div>" },
+                { title: "4강. 슬래시 명령어(Slash Commands) 도입", lecture: "채팅창에 슬래시(/)를 꾹 누르면 멋진 로봇 명령어가 촤르륵 뜨게 해요.", msg: "[숙제] Command 글자를 <h3>로 적어보세요.", req: ["<h3>", "Command", "</h3>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h3&gt;Slash Command&lt;/h3&gt;</div>" },
+                { title: "5강. 임베드(Embed) 메시지로 예쁘게 꾸미기", lecture: "알록달록 예쁜 테두리와 사진이 쏙 들어간 고급스러운 공지사항 상자예요.", msg: "[숙제] Embed 버튼을 만들어보세요.", req: ["<button>", "Embed", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Send Embed&lt;/button&gt;</div>" },
+                { title: "6강. 역할(Role) 부여 및 권한 제어", lecture: "동아리에 들어온 친구들에게 멋진 대장 이름표를 척척 달아줘요.", msg: "[숙제] Role 문단을 만들어보세요.", req: ["<p>", "Role", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;Auto Role&lt;/p&gt;</div>" },
+                { title: "7강. 음악 재생 봇(Voice Channel) 연동", lecture: "음악 채널에 쏙 들어가서 친구들과 함께 신나는 노래를 둥둥 틀어줘요.", msg: "[숙제] Voice 버튼을 만들어보세요.", req: ["<button>", "Voice", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Join Voice&lt;/button&gt;</div>" },
+                { title: "8강. 모니터링 로그(Log) 시스템 구축", lecture: "누가 들어왔고 누가 나갔는지 꼼꼼하게 적어두는 비밀 일기장이에요.", msg: "[숙제] Logging 글자를 <h2>로 적어보세요.", req: ["<h2>", "Logging", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;Server Logging&lt;/h2&gt;</div>" },
+                { title: "9강. 데이터베이스 연동과 레벨링 시스템", lecture: "채팅을 많이 할수록 레벨이 쑥쑥 올라가는 신나는 경험치 통이에요.", msg: "[숙제] Level 버튼을 만들어보세요.", req: ["<button>", "Level", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Check Level&lt;/button&gt;</div>" },
+                { title: "10강. 최종 프로젝트: 다기능 동아리 관리 디스코드 봇", lecture: "와! 내가 만든 멋진 디스코드 로봇 친구를 웹사이트에 뽐내봐요!", msg: "[숙제] 봇 타이틀과 실행 버튼을 함께 넣어 완성하세요!", req: ["<h1>", "<button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;Discord Bot&lt;/h1&gt;<br>&lt;button&gt;Run Bot&lt;/button&gt;</div>" }
+            ],
+            hacker: [
+                { title: "1강. 화이트 해커의 윤리 and 모의해킹 개요", lecture: "나쁜 해커로부터 컴퓨터를 지켜주는 멋진 보안 수호자, 화이트 해커가 되어봐요.", msg: "[숙제] <h1> 태그로 Hacker 이름을 적어보세요.", req: ["<h1>", "Hacker", "</h1>"], guide: "💡 <b>이렇게 쓰면 성공! (닫을 때 꼭 /를 넣어요)</b><div class='code-example'>&lt;h1&gt;White Hacker&lt;/h1&gt;</div>" },
+                { title: "2강. 네트워크 스캐닝과 포트 분석 (Nmap)", lecture: "건물에 열려 있는 창문이나 문이 어디 있는지 꼼꼼하게 살펴보는 탐정 놀이에요.", msg: "[숙제] Port 문단을 만들어보세요.", req: ["<p>", "Port", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;Port Scanning&lt;/p&gt;</div>" },
+                { title: "3강. 웹 취약점 진단 (OWASP Top 10)", lecture: "인터넷 세상에서 가장 자주 실수하고 조심해야 할 10가지 구멍을 찾아봐요.", msg: "[숙제] OWASP 글자를 <h2>로 적어보세요.", req: ["<h2>", "OWASP", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;OWASP Top 10&lt;/h2&gt;</div>" },
+                { title: "4강. SQL 인젝션(SQLi) 공격과 방어", lecture: "비밀번호 창을 뚫고 들어오는 무서운 해킹을 튼튼하게 막아내는 방패예요.", msg: "[숙제] SQLi 버튼을 만들어보세요.", req: ["<button>", "SQLi", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Block SQLi&lt;/button&gt;</div>" },
+                { title: "5강. XSS(Cross-Site Scripting) 취약점", lecture: "나쁜 코드가 웹사이트에 몰래 숨어들지 못하도록 꽁꽁 묶어두는 기술이에요.", msg: "[숙제] XSS 문단을 만들어보세요.", req: ["<p>", "XSS", "</p>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;p&gt;XSS Vulnerability&lt;/p&gt;</div>" },
+                { title: "6강. 패킷 분석과 스니핑 (Wireshark)", lecture: "인터넷 선을 타고 지나가는 편지 봉투들을 돋보기로 살짝 들여다봐요.", msg: "[숙제] Packet 버튼을 만들어보세요.", req: ["<button>", "Packet", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Capture Packets&lt;/button&gt;</div>" },
+                { title: "7강. 브루트 포스(Brute Force)와 패스워드 크래킹", lecture: "열쇠를 맞출 때까지 수백 번 문을 두드리는 무식한 해킹을 막아내요.", msg: "[숙제] BruteForce 글자를 <h3>로 적어보세요.", req: ["<h3>", "BruteForce", "</h3>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h3&gt;BruteForce Defense&lt;/h3&gt;</div>" },
+                { title: "8강. 리버싱(Reverse Engineering) 기초", lecture: "완성된 장난감을 조립 해체하면서 어떻게 움직이는지 뜯어보는 공부예요.", msg: "[숙제] Reversing 글자를 <h2>로 적어보세요.", req: ["<h2>", "Reversing", "</h2>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h2&gt;Binary Reversing&lt;/h2&gt;</div>" },
+                { title: "9강. 리눅스 보안 및 권한 설정 (Linux Sec)", lecture: "컴퓨터 대장 방에 아무나 들어오지 못하게 튼튼한 자물쇠를 채워둬요.", msg: "[숙제] Linux 버튼을 만들어보세요.", req: ["<button>", "Linux", "</button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;button&gt;Chmod 777&gt;/button&gt;</div>" },
+                { title: "10강. 최종 프로젝트: 취약점 진단 보고서 웹사이트", lecture: "와! 멋진 화이트 해커가 되어 내가 찾은 보안 이야기를 멋지게 뽐내봐요!", msg: "[숙제] 보고서 제목과 검사 버튼을 넣어 완성하세요!", req: ["<h1>", "<button>"], guide: "💡 <b>이렇게 쓰면 성공!</b><div class='code-example'>&lt;h1&gt;Security Report&lt;/h1&gt;<br>&lt;button&gt;Scan&lt;/button&gt;</div>" }
+            ]
+        };
 
         let currentStage = 1;
         let currentMission = {};
         let customStagesList = [];
+
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            openTraining();
+        }
 
         function openStageCreator() {
             stopLectureVoice();
@@ -358,7 +353,7 @@
             document.getElementById("code-input").value = "";
             document.getElementById("feedback").innerText = "";
 
-            let activeCourses = baseLectures;
+            let activeCourses = allCourses[selectedCategory] || allCourses['crypto'];
 
             if (currentStage <= activeCourses.length) {
                 let lec = activeCourses[currentStage - 1];
@@ -382,9 +377,9 @@
                     };
                 } else {
                     currentMission = {
-                        title: "🎉 모든 강의를 다 완수했어요!",
-                        lectureText: "정말 대단해요! 유치원 과정을 모두 멋지게 졸업하셨습니다!",
-                        msg: "<b>[졸업 축하]</b> 멋져요!",
+                        title: "🎉 해당 분야 정규 완강!",
+                        lectureText: "선택하신 진로 분야의 모든 강의 과정을 훌륭하게 완수하셨습니다!",
+                        msg: "<b>[완강 축하]</b> 멋지게 수료하셨습니다!",
                         req: [],
                         guide: "최고예요!"
                     };
@@ -461,7 +456,7 @@
             });
             let data = await res.json();
             if (data.success) { currentUser = id; localStorage.setItem("active_user", id); showBoardScreen(id); }
-            else { alert(data.msg); }
+            else { alert("비밀번호가 틀렸어요!"); }
         }
 
         function showBoardScreen(user) {
