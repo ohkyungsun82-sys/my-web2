@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 코드 공유 스튜디오</title>
+    <title>사이버 탐구 & 코드 공유 스튜디오 (실시간 반영판)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -22,7 +22,6 @@
         .switch-link { text-align: center; margin-top: 15px; font-size: 13px; color: #aaa; cursor: pointer; }
         .switch-link span { color: #00ffcc; font-weight: bold; text-decoration: underline; }
         
-        /* 훈련소 스타일 */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
         .stage-badge { background: #ff0055; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
         .npc-box { background: #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; margin-bottom: 12px; border-left: 5px solid #00ffcc; }
@@ -48,15 +47,13 @@
 
     <div id="app-container">
         <div class="title">사이버 탐구 & 코드 공유 스튜디오</div>
-        <div class="subtitle">학습부터 실시간 코드 공유까지 완벽 통합</div>
+        <div class="subtitle">실시간 자동 반영 동아리 플랫폼</div>
 
-        <!-- 메인 메뉴 -->
         <div id="main-menu-screen" class="screen active">
             <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (HTML 기초 학습)</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
         </div>
 
-        <!-- 훈련소 화면 -->
         <div id="training-screen" class="screen">
             <div class="header">
                 <div class="stage-badge" id="stage-display">STAGE 1</div>
@@ -73,7 +70,6 @@
             <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
         </div>
 
-        <!-- 로그인 화면 -->
         <div id="login-screen" class="screen">
             <div class="box">
                 <h3 style="margin-top:0; color:#00ffcc; text-align:center;">커뮤니티 로그인</h3>
@@ -85,7 +81,6 @@
             </div>
         </div>
 
-        <!-- 회원가입 화면 -->
         <div id="signup-screen" class="screen">
             <div class="box">
                 <h3 style="margin-top:0; color:#00ffcc; text-align:center;">회원가입</h3>
@@ -97,7 +92,6 @@
             </div>
         </div>
 
-        <!-- 게시판 스튜디오 화면 -->
         <div id="board-screen" class="screen">
             <div class="user-info">
                 <div>계정: <b id="display-user" style="color:#00ffcc;"></b> <span id="badge-area"></span></div>
@@ -118,7 +112,7 @@
             <textarea id="html-code-input" placeholder="&lt;h1&gt;내 코드&lt;/h1&gt;" style="height:70px; margin-bottom:6px;"></textarea>
             <button class="action-btn" onclick="shareCode()" style="padding:8px; font-size:14px;">코드 공유하기</button>
 
-            <div style="margin-top:12px; font-size:13px; font-weight:bold; color:#00ffcc;">🌍 실시간 공유된 목록</div>
+            <div style="margin-top:12px; font-size:13px; font-weight:bold; color:#00ffcc;">🌍 실시간 공유된 목록 (자동 반영 중)</div>
             <div class="board-container" id="posts-container"></div>
 
             <div id="admin-control-panel" class="admin-panel" style="display:none;">
@@ -148,6 +142,7 @@
 
     <script>
         let currentUser = localStorage.getItem("active_user") || null;
+        let autoRefreshInterval = null;
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -163,6 +158,12 @@
         function changeScreen(name) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.getElementById(name + '-screen').classList.add('active');
+            
+            // 게시판 화면이 아니면 실시간 새로고침 타이머 중지 (자원 절약)
+            if (name !== 'board' && autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
         }
 
         function goHome() {
@@ -170,7 +171,7 @@
             changeScreen('main-menu');
         }
 
-        // [코딩 공부 훈련소 로직]
+        // 훈련소 로직
         const trainingData = [
             { msg: "가장 큰 제목을 만들어보자!<br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Hello</span>를 적어봐.", req: ["<h1>", "Hello", "</h1>"], tip: "💡 **&lt;h1&gt;이란?** 가장 커다란 제목 글자를 만들 때 쓰는 태그야." },
             { msg: "누를 수 있는 버튼을 만들자!<br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 써봐.", req: ["<button>", "</button>"], tip: "💡 **태그란?** 컴퓨터에게 버튼을 만들어달라고 명령하는 상자야." },
@@ -219,7 +220,7 @@
             }
         }
 
-        // [커뮤니티 로직]
+        // 로그인 및 커뮤니티 로직
         function checkLoginStatus() {
             if (currentUser) {
                 showBoardScreen(currentUser);
@@ -263,11 +264,20 @@
             document.getElementById("admin-control-panel").style.display = isAdmin ? "block" : "none";
             if (isAdmin) loadUsers();
             loadPosts();
+
+            // 💡 핵심: 게시판에 들어와 있는 동안 3초마다 자동으로 서버에서 글 목록을 새로고침해 옴!
+            if (!autoRefreshInterval) {
+                autoRefreshInterval = setInterval(() => {
+                    loadPosts();
+                    if (isAdmin) loadUsers();
+                }, 3000);
+            }
         }
 
         function processLogout() {
             currentUser = null;
             localStorage.removeItem("active_user");
+            if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; }
             changeScreen('login');
         }
 
@@ -282,7 +292,7 @@
             });
             document.getElementById("code-title").value = "";
             document.getElementById("html-code-input").value = "";
-            loadPosts();
+            loadPosts(); // 즉시 반영
         }
 
         async function loadPosts() {
@@ -291,7 +301,10 @@
             let container = document.getElementById("posts-container");
             let isAdmin = (currentUser && currentUser.toLowerCase() === 'admin');
 
-            if (posts.length === 0) { container.innerHTML = "<div style='text-align:center; color:#666;'>공유된 코드 없음</div>"; return; }
+            if (posts.length === 0) { 
+                container.innerHTML = "<div style='text-align:center; color:#666; font-size:12px;'>공유된 코드 없음</div>"; 
+                return; 
+            }
 
             let html = "";
             posts.forEach(p => {
