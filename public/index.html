@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 친절한 암호 해독 스튜디오</title>
+    <title>사이버 탐구 & 두뇌 극한 암호 해독 스튜디오</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -34,7 +34,7 @@
         .tts-btn { background: #00bfff; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 5px; margin-bottom: 10px; }
         
         .guide-box { background: #1a1a1a; border-left: 4px solid #ff0055; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 13px; color: #ffcc00; }
-        .code-example { background: #111; color: #00ffcc; padding: 8px; border-radius: 5px; font-family: monospace; margin-top: 5px; font-size: 14px; font-weight: bold; }
+        .code-example { background: #111; color: #00ffcc; padding: 10px; border-radius: 5px; font-family: monospace; margin-top: 5px; font-size: 16px; font-weight: bold; text-align: center; letter-spacing: 2px; }
 
         .user-info { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
         .admin-badge { background: #ff0055; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; }
@@ -55,8 +55,8 @@
 <body>
 
     <div id="app-container">
-        <div class="title">사이버 탐구 & 친절한 암호 해독 스튜디오</div>
-        <div class="subtitle">🔐 단계별 풀이 과정이 포함된 암호 해독 챌린지</div>
+        <div class="title">사이버 탐구 & 두뇌 극한 암호 해독 스튜디오</div>
+        <div class="subtitle">🕵️‍♂️ 정답 베끼기 불가! 머리를 써서 추리하고 해독하세요</div>
 
         <!-- 메인 메뉴 -->
         <div id="main-menu-screen" class="screen active">
@@ -67,43 +67,43 @@
                 <button class="cat-btn" onclick="selectCategory('discord')">🤖 디스코드 봇 개발</button>
                 <button class="cat-btn" onclick="selectCategory('hacker')">🛡️ 화이트 해커</button>
             </div>
-            <button class="menu-btn" onclick="openStageCreator()">✏️ 나만의 강의 직접 만들기</button>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 나만의 문제 직접 만들기</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
         </div>
 
         <!-- 강의실 화면 -->
         <div id="training-screen" class="screen">
             <div class="header">
-                <div class="stage-badge" id="stage-display">LECTURE 1</div>
+                <div class="stage-badge" id="stage-display">STAGE 1</div>
                 <div>
-                    <button onclick="openStageSelectModal()" style="background:#00ffcc; color:#000; border:none; padding:4px 8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">📌 강의 선택</button>
+                    <button onclick="openStageSelectModal()" style="background:#00ffcc; color:#000; border:none; padding:4px 8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">📌 스테이지 선택</button>
                 </div>
             </div>
             
             <div class="lecture-card" id="lecture-content-box">
-                <div class="lecture-title" id="lec-title">강의 제목</div>
+                <div class="lecture-title" id="lec-title">미션 제목</div>
                 <div>
-                    <button class="tts-btn" onclick="playLectureVoice()">🔊 음성으로 듣기</button>
+                    <button class="tts-btn" onclick="playLectureVoice()">🔊 힌트 음성으로 듣기</button>
                     <button class="tts-btn" onclick="stopLectureVoice()" style="background:#444; color:#fff;">⏹ 정지</button>
                 </div>
-                <div id="lec-body" style="margin-top:8px;">강의 설명 내용</div>
-                <div class="guide-box" id="lec-guide">풀이 과정 가이드</div>
+                <div id="lec-body" style="margin-top:8px;">미션 설명</div>
+                <div class="guide-box" id="lec-guide">추리 단서</div>
             </div>
 
-            <textarea id="code-input" placeholder="여기에 해독한 정답 단어를 입력하세요." style="height:90px;"></textarea>
-            <button class="action-btn" onclick="checkCode()">▶ 정답 제출 및 해독 확인</button>
+            <textarea id="code-input" placeholder="여기에 추리한 해독 정답을 입력하세요 (정답은 대문자로!)" style="height:70px;"></textarea>
+            <button class="action-btn" onclick="checkCode()">🔍 암호 해독 정답 제출하기</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
             <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
         </div>
 
         <div id="creator-screen" class="screen">
-            <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 진로 강의 및 실습 만들기</h3>
-            <input type="text" id="custom-title" placeholder="강의 주제 이름" style="font-size:13px;">
-            <textarea id="custom-lecture" placeholder="[개념 강의 내용]" style="height:60px; font-size:13px;"></textarea>
-            <textarea id="custom-msg" placeholder="[해독 미션 설명]" style="height:40px; font-size:13px;"></textarea>
-            <input type="text" id="custom-reqs" placeholder="정답 키워드" style="font-size:13px;">
-            <textarea id="custom-guide" placeholder="[친절한 풀이 과정 및 힌트]" style="height:50px; font-size:13px;"></textarea>
-            <button class="action-btn" onclick="saveCustomStage()">강의 등록하기</button>
+            <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 암호 해독 퀴즈 만들기</h3>
+            <input type="text" id="custom-title" placeholder="퀴즈 제목 (예: 고대 비밀문서 해독)" style="font-size:13px;">
+            <textarea id="custom-lecture" placeholder="[미션 배경 설명] 어떤 상황인지 적어주세요." style="height:50px; font-size:13px;"></textarea>
+            <textarea id="custom-msg" placeholder="[암호문] 풀어나가야 할 암호 텍스트를 적어주세요." style="height:40px; font-size:13px;"></textarea>
+            <input type="text" id="custom-reqs" placeholder="정답 키워드 (정확한 단어 1개)" style="font-size:13px;">
+            <textarea id="custom-guide" placeholder="[추리 단서] 정답은 알려주지 말고 힌트만 적어주세요." style="height:50px; font-size:13px;"></textarea>
+            <button class="action-btn" onclick="saveCustomStage()">퀴즈 등록하기</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
         </div>
 
@@ -163,8 +163,8 @@
 
     <div id="stage-modal" class="modal">
         <div class="modal-content">
-            <h3 style="color:#00ffcc; margin-top:0;">📌 강의 선택</h3>
-            <p style="font-size:12px; color:#aaa;">이동할 강의 번호를 입력하세요!</p>
+            <h3 style="color:#00ffcc; margin-top:0;">📌 스테이지 선택</h3>
+            <p style="font-size:12px; color:#aaa;">이동할 스테이지 번호를 입력하세요!</p>
             <input type="number" id="target-stage-input" min="1" value="1" style="text-align:center; font-size:18px;">
             <button class="action-btn" onclick="jumpToStage()" style="padding:8px; font-size:14px; margin-bottom:5px;">이동하기</button>
             <button class="action-btn sub-btn" onclick="closeStageModal()" style="padding:8px; font-size:14px;">닫기</button>
@@ -233,115 +233,115 @@
             if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
         }
 
-        // 🔐 [암호학 10단계: 풀이 과정과 해독 방법을 상세히 알려주는 친절한 챌린지]
+        // 🕵️‍♂️ [정답 베끼기 불가! 머리를 써서 추리하는 진짜 암호 해독 10단계 챌린지]
         const allCourses = {
             crypto: [
                 { 
-                    title: "1강. 시저 암호 해독 (Shift +3)", 
-                    lecture: "<b>[개념 강의]</b> 시저 암호는 알파벳을 일정한 칸 수(여기서는 3칸)만큼 밀어서 만든 암호입니다.<br><br><b>[해독 풀이 가이드]</b><br>• 암호문: <code>KHOOR</code><br>• 풀이 방법: 알파벳 순서에서 각 글자보다 <b>3칸 앞(왼쪽)에 있는 글자</b>를 찾아보세요!<br>- K(11번째) - 3 = H(8번째)<br>- H(8번째) - 3 = E(5번째)", 
-                    msg: "<b>[해독 미션]</b> <code>KHOOR</code>를 해독한 원래 영단어를 대문자로 입력하세요.", 
+                    title: "STAGE 1. 시저 암호 해독 (Shift +3)", 
+                    lecture: "<b>[작전 브리핑]</b> 로마의 시저 황제가 밀어 쓰던 고대 암호입니다. 알파벳이 각각 3칸씩 밀려 있어요!", 
+                    msg: "<b>[암호문 수신]</b><div class='code-example'>KHOOR</div>이 암호문을 해독하여 원래 단어를 맞추세요!", 
                     req: ["HELLO"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> K->H, H->E, O->L, O->L, R->O 순서로 맞추면 어떤 인사말이 될까요?" 
+                    guide: "🔍 <b>추리 단서:</b> 알파벳을 각각 3칸씩 앞으로(왼쪽으로) 당겨보세요! (예: K 앞의 3번째 글자는?)" 
                 },
                 { 
-                    title: "2강. 시저 암호 해독 (Shift +5)", 
-                    lecture: "<b>[개념 강의]</b> 이번에는 알파벳을 정확히 5칸씩 밀어서 만든 시저 암호입니다.<br><br><b>[해독 풀이 가이드]</b><br>• 암호문: <code>BJSWJ</code><br>• 풀이 방법: 각 알파벳을 <b>5칸 앞으로(왼쪽으로)</b> 당겨보세요!<br>- B에서 5칸 앞으로 가면? (알파벳은 순환하므로 B -> A -> Z -> Y -> X -> W)", 
-                    msg: "<b>[해독 미션]</b> <code>BJSWJ</code>를 해독한 원래 영단어를 대문자로 입력하세요.", 
+                    title: "STAGE 2. 시저 암호 해독 2단 챌린지", 
+                    lecture: "<b>[작전 브리핑]</b> 이번에는 알파벳이 정확히 5칸씩 밀려난 고도의 시저 암호입니다.", 
+                    msg: "<b>[암호문 수신]</b><div class='code-example'>BJSWJ</div>이 암호의 원본 영단어를 추리하세요!", 
                     req: ["ENJOY"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> B->E, J->N, S->J, W->O, J->Y 순서입니다." 
+                    guide: "🔍 <b>추리 단서:</b> 알파벳을 각각 5칸씩 앞으로 당겨서 단어를 완성해 보세요!" 
                 },
                 { 
-                    title: "3강. 아스키코드(ASCII) 숫자 해독", 
-                    lecture: "<b>[개념 강의]</b> 컴퓨터는 문자를 곧바로 이해하지 못하고 숫자로 변환해서 기억합니다. 이를 아스키코드라고 해요.<br><br><b>[해독 풀이 가이드]</b><br>• 숫자 데이터: <code>72, 69, 76, 76, 79</code><br>• 풀이 방법: 아스키코드 표에서 72는 'H', 69는 'E'를 뜻합니다. 차례대로 문자로 바꿔보세요!", 
-                    msg: "<b>[실습 미션]</b> <code>72, 69, 76, 76, 79</code>를 문자로 조합한 단어를 입력하세요.", 
+                    title: "STAGE 3. 아스키코드(ASCII) 숫자 추리", 
+                    lecture: "<b>[작전 브리핑]</b> 컴퓨터가 기억하는 숫자를 문자로 변환해야 본부와 통신할 수 있습니다.", 
+                    msg: "<b>[암호 데이터]</b><div class='code-example'>72, 69, 76, 76, 79</div>이 아스키코드 숫자가 뜻하는 영어 단어는?", 
                     req: ["HELLO"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> 1강에서 풀었던 그 단어(H-E-L-L-O)와 숫자가 일치합니다!" 
+                    guide: "🔍 <b>추리 단서:</b> STAGE 1에서 풀었던 그 반가운 인사말과 숫자가 연결되어 있어요!" 
                 },
                 { 
-                    title: "4강. 역순(Reverse) 암호 해독", 
-                    lecture: "<b>[개념 강의]</b> 글자의 순서를 맨 뒤에서부터 앞으로 정반대로 뒤집어 놓은 가장 단순하지만 재미있는 교묘한 암호입니다.<br><br><b>[해독 풀이 가이드]</b><br>• 암호문: <code>REKCAB</code><br>• 풀이 방법: 맨 마지막 글자 'R'을 맨 앞으로 가져오고, 그 다음 'K'를 가져오는 식으로 거꾸로 읽어보세요.", 
-                    msg: "<b>[실습 미션]</b> <code>REKCAB</code>을 거꾸로 뒤집어 해독한 단어를 입력하세요.", 
+                    title: "STAGE 4. 역순(Reverse) 암호 해독", 
+                    lecture: "<b>[작전 브리핑]</b> 적의 눈을 속이기 위해 글자 순서를 맨 뒤에서부터 거꾸로 뒤집어 놓은 암호문입니다.", 
+                    msg: "<b>[암호문 수신]</b><div class='code-example'>REKCAB</div>거꾸로 뒤집힌 이 단어를 원래대로 바로 세워보세요!", 
                     req: ["HACKER"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> R-E-K-C-A-B를 반대로 뒤집어보세요. (R이 맨 앞으로!)" 
+                    guide: "🔍 <b>추리 단서:</b> 맨 뒤의 글자부터 앞으로 순서대로 읽어보세요!" 
                 },
                 { 
-                    title: "5강. 이진수(Binary) 알파벳 해독", 
-                    lecture: "<b>[개념 강의]</b> 컴퓨터의 뿌리인 0과 1의 이진수 조합으로 표현된 데이터에서 특정 알파벳을 유추하는 해독 훈련입니다.<br><br><b>[해독 풀이 가이드]</b><br>• 문제: 알파벳 대문자 'G'는 아스키코드로 71입니다. 이를 8비트 이진수로 바꾸면 <code>01000111</code>이 됩니다.", 
-                    msg: "<b>[실습 미션]</b> 이진수 <code>01000111</code>이 뜻하는 알파벳 대문자 <code>G</code>를 입력하세요.", 
+                    title: "STAGE 5. 이진수(Binary) 알파벳 추리", 
+                    lecture: "<b>[작전 브리핑]</b> 컴퓨터의 기본 언어인 0과 1 속에서 숨겨진 알파벳 대문자를 찾아내야 합니다.", 
+                    msg: "<b>[수신된 이진수]</b><div class='code-example'>01000111</div>이 8비트 이진수가 뜻하는 알파벳 대문자는?", 
                     req: ["G"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> 대문자 알파벳 G를 입력하시면 정답 처리됩니다." 
+                    guide: "🔍 <b>추리 단서:</b> 아스키코드 71번에 해당하는 알파벳 대문자 1글자입니다." 
                 },
                 { 
-                    title: "6강. 모스 부호(Morse Code) 구조 파악", 
-                    lecture: "<b>[개념 강의]</b> 짧은 신호(점, <b>·</b>)와 긴 신호(선, <b>-</b>)를 조합해 통신을 주고받던 역사적인 모스 부호 체계입니다.<br><br><b>[해독 풀이 가이드]</b><br>• 전설의 구조: 조난 신호인 SOS는 <code>··· --- ···</code> 로 이루어져 있습니다. 가운데 'O'는 긴 신호(-) 3개로 구성돼요.", 
-                    msg: "<b>[실습 미션]</b> 모스 부호 'O'를 구성하는 긴 신호(-)의 개수인 숫자 <code>3</code>을 입력하세요.", 
+                    title: "STAGE 6. 모스 부호(Morse Code) 카운트", 
+                    lecture: "<b>[작전 브리핑]</b> 통신망을 통해 전송된 모스 부호의 구조를 분석하는 미션입니다.", 
+                    msg: "<b>[미션 내용]</b> 조난 신호 SOS(··· --- ···)에서 가운데 'O'를 이루는 긴 신호(-)의 개수는 몇 개인가요?", 
                     req: ["3"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> 숫자 3을 입력하세요." 
+                    guide: "🔍 <b>추리 단서:</b> 띠- 띠- 띠- 몇 번 울리나요? 숫자로 입력하세요." 
                 },
                 { 
-                    title: "7강. XOR 비트 연산 복호화", 
-                    lecture: "<b>[개념 강의]</b> 암호학에서 가장 많이 쓰이는 XOR 연산은, 암호화된 데이터에 똑같은 키(Key)를 한 번 더 연산하면 거짓말처럼 원래 데이터가 튀어나오는 마법의 성질이 있습니다.<br><br><b>[해독 풀이 가이드]</b><br>• 공식: <code>원본 ^ 키 = 암호문</code> 이고, 반대로 <code>암호문 ^ 키 = 원본</code> 입니다.", 
-                    msg: "<b>[실습 미션]</b> 키가 5일 때, 암호문 10을 복호화한 결과인 숫자 <code>15</code>를 입력하세요.", 
+                    title: "STAGE 7. XOR 비트 연산 복호화 추리", 
+                    lecture: "<b>[작전 브리핑]</b> 암호학의 핵심인 비트 연산의 왕복 성질을 이용해 원래 데이터를 역추적합니다.", 
+                    msg: "<b>[연산 조건]</b> 암호문 10과 키 5를 XOR 연산(암호문 ^ 키)했을 때 나오는 결과 숫자는?", 
                     req: ["15"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> 숫자 15를 입력하세요." 
+                    guide: "🔍 <b>추리 단서:</b> 10과 5를 연산한 최종 숫자를 적어보세요." 
                 },
                 { 
-                    title: "8강. 키워드 치환(Substitution) 암호 확인", 
-                    lecture: "<b>[개념 강의]</b> 알파벳 순서를 키워드 기준으로 뒤섞어 놓은 치환표를 대조하여 원문을 복원하는 해독 단계입니다.<br><br><b>[해독 풀이 가이드]</b><br>• 해독 완료 확인: 복호화 매핑이 성공적으로 끝났음을 알리는 시스템 승인 코드를 입력합니다.", 
-                    msg: "<b>[실습 미션]</b> 해독 성공 확인 키워드인 대문자 <code>SUCCESS</code>를 입력하세요.", 
+                    title: "STAGE 8. 치환 암호 승인 코드", 
+                    lecture: "<b>[작전 브리핑]</b> 알파벳 매핑 테이블을 성공적으로 해독했을 때 출력되는 시스템 승인 키워드입니다.", 
+                    msg: "<b>[확인 요청]</b> 해독 완료를 뜻하는 영단어 <code>SUCCESS</code>를 대문자로 입력하세요.", 
                     req: ["SUCCESS"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> SUCCESS를 대문자로 입력하세요." 
+                    guide: "🔍 <b>추리 단서:</b> 대문자로 SUCCESS를 입력하세요." 
                 },
                 { 
-                    title: "9강. 해시(Hash) 레인보우 테이블 대조", 
-                    lecture: "<b>[개념 강의]</b> 해시 함수로 암호화되어 버린 비밀번호를 풀기 위해, 미리 계산해 둔 방대한 해시 목록(레인보우 테이블)과 대조해 원래 비밀번호를 찾아내는 해독 과정입니다.", 
-                    msg: "<b>[실습 미션]</b> 레인보우 테이블 대조 결과 찾아낸 원래 패스워드인 <code>admin123</code>을 입력하세요.", 
+                    title: "STAGE 9. 해시 레인보우 테이블 매칭", 
+                    lecture: "<b>[작전 브리핑]</b> 해시로 암호화된 계정의 원본 패스워드를 테이블 대조를 통해 밝혀냅니다.", 
+                    msg: "<b>[대상 계정]</b> 해독된 관리자 패스워드 원문인 <code>admin123</code>을 입력하세요.", 
                     req: ["admin123"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> admin123을 입력하세요." 
+                    guide: "🔍 <b>추리 단서:</b> admin123을 그대로 입력하세요." 
                 },
                 { 
-                    title: "10강. 최종 프로젝트: 마스터 암호 해독 완료", 
-                    lecture: "<b>[개념 강의]</b> 와! 암호학 10개 과정을 모두 훌륭하게 소화하셨습니다. 모든 보안 시스템을 해제하는 최종 마스터 키를 입력하여 스튜디오를 통과하세요!<br><br><b>[해독 풀이 가이드]</b><br>• 최종 관문 키: <code>MASTER_KEY</code>", 
-                    msg: "<b>[실습 미션]</b> 최종 관문 통과 키워드인 <code>MASTER_KEY</code>를 정확히 입력하세요.", 
+                    title: "STAGE 10. 최종 관문: 마스터 디코더 통과", 
+                    lecture: "<b>[작전 브리핑]</b> 모든 해독 챌린지를 완수했습니다. 스튜디오 시스템의 모든 잠금을 해제하는 최종 마스터 키를 입력하세요!", 
+                    msg: "<b>[최종 미션]</b> 최종 관문 키워드인 <code>MASTER_KEY</code>를 입력하세요.", 
                     req: ["MASTER_KEY"], 
-                    guide: "💡 <b>정답 풀이 힌트:</b> MASTER_KEY를 그대로 입력하세요." 
+                    guide: "🔍 <b>추리 단서:</b> MASTER_KEY를 정확히 입력하세요." 
                 }
             ],
             game: [
-                { title: "1강. HTML5 캔버스 셋팅", lecture: "<b>[개념 강의]</b> 캔버스 객체를 불러옵니다.<br><b>[풀이 가이드]</b> 컨텍스트를 가져오는 함수인 getContext를 사용합니다.", msg: "<b>[실습 미션]</b> <code>getContext</code>를 적어보세요.", req: ["getContext"], guide: "예시: let ctx = canvas.getContext('2d');" },
-                { title: "2강. 게임 루프 구현", lecture: "<b>[개념 강의]</b> 애니메이션 프레임을 요청합니다.<br><b>[풀이 가이드]</b> requestAnimationFrame 함수를 씁니다.", msg: "<b>[실습 미션]</b> <code>requestAnimationFrame</code>을 적어보세요.", req: ["requestAnimationFrame"], guide: "예시: requestAnimationFrame(loop);" },
-                { title: "3강. 플레이어 객체", lecture: "<b>[개념 강의]</b> 좌표 속성을 정의합니다.<br><b>[풀이 가이드]</b> player 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>player</code>를 선언하세요.", req: ["player"], guide: "예시: let player = {};" },
-                { title: "4강. 키보드 입력", lecture: "<b>[개념 강의]</b> 키 이벤트 리스너를 붙입니다.<br><b>[풀이 가이드]</b> addEventListener를 씁니다.", msg: "<b>[실습 미션]</b> <code>addEventListener</code>를 적어보세요.", req: ["addEventListener"], guide: "예시: window.addEventListener('keydown', e=>{});" },
-                { title: "5강. 중력 물리법칙", lecture: "<b>[개념 강의]</b> 수직 가속도를 더합니다.<br><b>[풀이 가이드]</b> gravity 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>gravity</code>를 선언하세요.", req: ["gravity"], guide: "예시: let gravity = 0.5;" },
-                { title: "6강. 충돌 검출", lecture: "<b>[개념 강의]</b> 상자 겹침을 판정합니다.<br><b>[풀이 가이드]</b> collision 함수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>collision</code> 함수를 적어보세요.", req: ["collision"], guide: "예시: function checkCollision() {}" },
-                { title: "7강. 적 AI 스폰", lecture: "<b>[개념 강의]</b> 적 오브젝트를 생성합니다.<br><b>[풀이 가이드]</b> enemies 배열을 만듭니다.", msg: "<b>[실습 미션]</b> <code>enemies</code>를 선언하세요.", req: ["enemies"], guide: "예시: let enemies = [];" },
-                { title: "8강. 점수 시스템", lecture: "<b>[개념 강의]</b> 점수를 카운트합니다.<br><b>[풀이 가이드]</b> score 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>score</code>를 선언하세요.", req: ["score"], guide: "예시: let score = 0;" },
-                { title: "9강. 파티클 이펙트", lecture: "<b>[개념 강의]</b> 타격감용 파티클을 만듭니다.<br><b>[풀이 가이드]</b> particles 배열을 만듭니다.", msg: "<b>[실습 미션]</b> <code>particles</code>를 선언하세요.", req: ["particles"], guide: "예시: let particles = [];" },
-                { title: "10강. 미니게임 완성", lecture: "<b>[개념 강의]</b> 게임을 시작합니다.<br><b>[풀이 가이드]</b> startGame 함수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>startGame()</code>을 완성하세요.", req: ["startGame"], guide: "예시: function startGame() {}" }
+                { title: "STAGE 1. 캔버스 초기화", lecture: "게임 렌더링 도화지를 불러옵니다.", msg: "컨텍스트를 가져오는 함수명을 적어보세요.", req: ["getContext"], guide: "힌트: getContext('2d')" },
+                { title: "STAGE 2. 루프 작동", lecture: "프레임 반복 함수를 호출합니다.", msg: "애니메이션 루프 함수명을 적어보세요.", req: ["requestAnimationFrame"], guide: "힌트: requestAnimationFrame(...)" },
+                { title: "STAGE 3. 플레이어 설정", lecture: "주인공 객체를 정의합니다.", msg: "플레이어 변수명을 적어보세요.", req: ["player"], guide: "힌트: let player = ..." },
+                { title: "STAGE 4. 키 입력", lecture: "키보드 이벤트를 감지합니다.", msg: "이벤트 등록 함수명을 적어보세요.", req: ["addEventListener"], guide: "힌트: window.addEventListener(...)" },
+                { title: "STAGE 5. 중력 계산", lecture: "수직 낙하 가속도를 적용합니다.", msg: "중력 변수명을 적어보세요.", req: ["gravity"], guide: "힌트: let gravity = ..." },
+                { title: "STAGE 6. 충돌 판정", lecture: "박스 간 겹침을 검사합니다.", msg: "충돌 검사 함수명을 적어보세요.", req: ["collision"], guide: "힌트: function checkCollision()" },
+                { title: "STAGE 7. 적 소환", lecture: "적 오브젝트를 생성합니다.", msg: "적 배열 변수명을 적어보세요.", req: ["enemies"], guide: "힌트: let enemies = []" },
+                { title: "STAGE 8. 점수 카운트", lecture: "플레이어 점수를 누적합니다.", msg: "점수 변수명을 적어보세요.", req: ["score"], guide: "힌트: let score = 0" },
+                { title: "STAGE 9. 파티클 효과", lecture: "타격감용 파티클을 뿌립니다.", msg: "파티클 배열 변수명을 적어보세요.", req: ["particles"], guide: "힌트: let particles = []" },
+                { title: "STAGE 10. 게임 시작", lecture: "모든 로직을 실행합니다.", msg: "시작 함수명을 적어보세요.", req: ["startGame"], guide: "힌트: function startGame()" }
             ],
             discord: [
-                { title: "1강. 클라이언트 생성", lecture: "<b>[개념 강의]</b> 봇 인스턴스를 만듭니다.<br><b>[풀이 가이드]</b> new Client를 사용합니다.", msg: "<b>[실습 미션]</b> <code>Client</code>를 적어보세요.", req: ["Client"], guide: "예시: const client = new Client();" },
-                { title: "2강. 토큰 로그인", lecture: "<b>[개념 강의]</b> 봇 토큰으로 로그인합니다.<br><b>[풀이 가이드]</b> client.login을 씁니다.", msg: "<b>[실습 미션]</b> <code>client.login</code>을 적어보세요.", req: ["client.login"], guide: "예시: client.login('TOKEN');" },
-                { title: "3강. 메시지 이벤트", lecture: "<b>[개념 강의]</b> 채팅 메시지를 감지합니다.<br><b>[풀이 가이드]</b> messageCreate를 씁니다.", msg: "<b>[실습 미션]</b> <code>messageCreate</code>를 적어보세요.", req: ["messageCreate"], guide: "예시: client.on('messageCreate', m => {});" },
-                { title: "4강. 슬래시 명령어", lecture: "<b>[개념 강의]</b> 명령어 빌더를 씁니다.<br><b>[풀이 가이드]</b> SlashCommandBuilder를 씁니다.", msg: "<b>[실습 미션]</b> <code>SlashCommandBuilder</code>를 적어보세요.", req: ["SlashCommandBuilder"], guide: "예시: new SlashCommandBuilder();" },
-                { title: "5강. 임베드 메시지", lecture: "<b>[개념 강의]</b> 예쁜 임베드를 만듭니다.<br><b>[풀이 가이드]</b> EmbedBuilder를 씁니다.", msg: "<b>[실습 미션]</b> <code>EmbedBuilder</code>를 적어보세요.", req: ["EmbedBuilder"], guide: "예시: new EmbedBuilder();" },
-                { title: "6강. 유저 입장 환영", lecture: "<b>[개념 강의]</b> 멤버 입장을 감지합니다.<br><b>[풀이 가이드]</b> guildMemberAdd를 씁니다.", msg: "<b>[실습 미션]</b> <code>guildMemberAdd</code>를 적어보세요.", req: ["guildMemberAdd"], guide: "예시: client.on('guildMemberAdd', m => {});" },
-                { title: "7강. 음성 채널 연결", lecture: "<b>[개념 강의]</b> 보이스 채널에 접속합니다.<br><b>[풀이 가이드]</b> joinVoiceChannel을 씁니다.", msg: "<b>[실습 미션]</b> <code>joinVoiceChannel</code>을 적어보세요.", req: ["joinVoiceChannel"], guide: "예시: joinVoiceChannel({});" },
-                { title: "8강. 서버 로그 시스템", lecture: "<b>[개념 강의]</b> 채널을 가져옵니다.<br><b>[풀이 가이드]</b> channels.cache를 씁니다.", msg: "<b>[실습 미션]</b> <code>channels.cache</code>를 적어보세요.", req: ["channels.cache"], guide: "예시: client.channels.cache.get('id');" },
-                { title: "9강. 레벨링 시스템", lecture: "<b>[개념 강의]</b> 데이터베이스를 연결합니다.<br><b>[풀이 가이드]</b> mongoose를 씁니다.", msg: "<b>[실습 미션]</b> <code>mongoose</code>를 적어보세요.", req: ["mongoose"], guide: "예시: const mongoose = require('mongoose');" },
-                { title: "10강. 종합 봇 완성", lecture: "<b>[개념 강의]</b> 봇을 구동합니다.<br><b>[풀이 가이드]</b> startBot 함수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>startBot()</code>을 완성하세요.", req: ["startBot"], guide: "예시: function startBot() {}" }
+                { title: "STAGE 1. 봇 클라이언트", lecture: "디스코드 봇 인스턴스를 생성합니다.", msg: "클라이언트 클래스명을 적어보세요.", req: ["Client"], guide: "힌트: new Client()" },
+                { title: "STAGE 2. 토큰 인증", lecture: "봇 비밀 토큰으로 로그인합니다.", msg: "로그인 메서드명을 적어보세요.", req: ["client.login"], guide: "힌트: client.login(...)" },
+                { title: "STAGE 3. 메시지 감지", lecture: "채팅 이벤트를 리스닝합니다.", msg: "이벤트명을 적어보세요.", req: ["messageCreate"], guide: "힌트: client.on('messageCreate', ...)" },
+                { title: "STAGE 4. 슬래시 커맨드", lecture: "대화형 명령어를 빌드합니다.", msg: "명령어 빌더 클래스명을 적어보세요.", req: ["SlashCommandBuilder"], guide: "힌트: new SlashCommandBuilder()" },
+                { title: "STAGE 5. 임베드 전송", lecture: "고급 임베드 메시지를 구성합니다.", msg: "임베드 클래스명을 적어보세요.", req: ["EmbedBuilder"], guide: "힌트: new EmbedBuilder()" },
+                { title: "STAGE 6. 멤버 환영", lecture: "유저 입장을 감지합니다.", msg: "입장 이벤트명을 적어보세요.", req: ["guildMemberAdd"], guide: "힌트: client.on('guildMemberAdd', ...)" },
+                { title: "STAGE 7. 음성 채널", lecture: "보이스 채널에 접속합니다.", msg: "음성 연결 함수명을 적어보세요.", req: ["joinVoiceChannel"], guide: "힌트: joinVoiceChannel(...)" },
+                { title: "STAGE 8. 로그 시스템", lecture: "관리자 로그 채널을 가져옵니다.", msg: "채널 캐시 접근 코드를 적어보세요.", req: ["channels.cache"], guide: "힌트: client.channels.cache" },
+                { title: "STAGE 9. DB 연동", lecture: "데이터베이스 스키마를 정의합니다.", msg: "모듈명을 적어보세요.", req: ["mongoose"], guide: "힌트: require('mongoose')" },
+                { title: "STAGE 10. 봇 구동", lecture: "종합 봇을 실행합니다.", msg: "실행 함수명을 적어보세요.", req: ["startBot"], guide: "힌트: function startBot()" }
             ],
             hacker: [
-                { title: "1강. 모의해킹 개요", lecture: "<b>[개념 강의]</b> 타겟 아이피를 지정합니다.<br><b>[풀이 가이드]</b> targetIp 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>targetIp</code>를 선언하세요.", req: ["targetIp"], guide: "예시: let targetIp = '127.0.0.1';" },
-                { title: "2강. 포트 스캐닝", lecture: "<b>[개념 강의]</b> 포트 배열을 지정합니다.<br><b>[풀이 가이드]</b> ports 배열을 만듭니다.", msg: "<b>[실습 미션]</b> <code>ports</code>를 선언하세요.", req: ["ports"], guide: "예시: let ports = [80, 443];" },
-                { title: "3강. OWASP Top 10", lecture: "<b>[개념 강의]</b> 취약점 검사 함수를 만듭니다.<br><b>[풀이 가이드]</b> checkVulnerability를 씁니다.", msg: "<b>[실습 미션]</b> <code>checkVulnerability()</code>를 작성하세요.", req: ["checkVulnerability"], guide: "예시: function checkVulnerability() {}" },
-                { title: "4강. SQL 인젝션", lecture: "<b>[개념 강의]</b> SQL 페이로드를 작성합니다.<br><b>[풀이 가이드]</b> sqlPayload 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>sqlPayload</code>를 작성하세요.", req: ["sqlPayload"], guide: "예시: let sqlPayload = \"' OR '1'='1\";" },
-                { title: "5강. XSS 취약점", lecture: "<b>[개념 강의]</b> 쿠키 정보를 가져옵니다.<br><b>[풀이 가이드]</b> document.cookie를 씁니다.", msg: "<b>[실습 미션]</b> <code>document.cookie</code>를 작성하세요.", req: ["document.cookie"], guide: "예시: let cookie = document.cookie;" },
-                { title: "6강. 패킷 스니핑", lecture: "<b>[개념 강의]</b> 패킷 버퍼를 만듭니다.<br><b>[풀이 가이드]</b> packetBuffer 배열을 만듭니다.", msg: "<b>[실습 미션]</b> <code>packetBuffer</code>를 선언하세요.", req: ["packetBuffer"], guide: "예시: let packetBuffer = [];" },
-                { title: "7강. 브루트 포스 방어", lecture: "<b>[개념 강의]</b> 실패 횟수를 셉니다.<br><b>[풀이 가이드]</b> loginAttempts 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>loginAttempts</code>를 만드세요.", req: ["loginAttempts"], guide: "예시: let loginAttempts = 0;" },
-                { title: "8강. 리버싱 분석", lecture: "<b>[개념 강의]</b> 바이너리 데이터를 담습니다.<br><b>[풀이 가이드]</b> binaryData 변수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>binaryData</code>를 선언하세요.", req: ["binaryData"], guide: "예시: let binaryData = new Uint8Array();" },
-                { title: "9강. 리눅스 권한 제어", lecture: "<b>[개념 강의]</b> 권한 설정 함수를 만듭니다.<br><b>[풀이 가이드]</b> chmod 함수를 씁니다.", msg: "<b>[실습 미션]</b> <code>chmod()</code>를 작성하세요.", req: ["chmod"], guide: "예시: function chmod() {}" },
-                { title: "10강. 진단 스캐너 완성", lecture: "<b>[개념 강의]</b> 보안 스캔을 실행합니다.<br><b>[풀이 가이드]</b> runSecurityScan 함수를 만듭니다.", msg: "<b>[실습 미션]</b> <code>runSecurityScan()</code>을 완성하세요.", req: ["runSecurityScan"], guide: "예시: function runSecurityScan() {}" }
+                { title: "STAGE 1. 타겟 지정", lecture: "진단할 대상 아이피를 정의합니다.", msg: "타겟 변수명을 적어보세요.", req: ["targetIp"], guide: "힌트: let targetIp = ..." },
+                { title: "STAGE 2. 포트 분석", lecture: "열린 포트 목록을 지정합니다.", msg: "포트 배열 변수명을 적어보세요.", req: ["ports"], guide: "힌트: let ports = []" },
+                { title: "STAGE 3. 취약점 진단", lecture: "웹 취약점을 체크하는 함수입니다.", msg: "검사 함수명을 적어보세요.", req: ["checkVulnerability"], guide: "힌트: function checkVulnerability()" },
+                { title: "STAGE 4. SQL 인젝션", lecture: "인증 우회용 쿼리 페이로드입니다.", msg: "페이로드 변수명을 적어보세요.", req: ["sqlPayload"], guide: "힌트: let sqlPayload = ..." },
+                { title: "STAGE 5. XSS 공격", lecture: "쿠키 정보를 탈취하는 코드입니다.", msg: "쿠키 접근 코드를 적어보세요.", req: ["document.cookie"], guide: "힌트: document.cookie" },
+                { title: "STAGE 6. 패킷 캡처", lecture: "네트워크 패킷 버퍼를 정의합니다.", msg: "버퍼 변수명을 적어보세요.", req: ["packetBuffer"], guide: "힌트: let packetBuffer = []" },
+                { title: "STAGE 7. 브루트 포스", lecture: "로그인 실패 횟수를 카운트합니다.", msg: "시도 횟수 변수명을 적어보세요.", req: ["loginAttempts"], guide: "힌트: let loginAttempts = 0" },
+                { title: "STAGE 8. 리버싱 분석", lecture: "바이너리 데이터를 담는 객체입니다.", msg: "바이너리 변수명을 적어보세요.", req: ["binaryData"], guide: "힌트: let binaryData = ..." },
+                { title: "STAGE 9. 권한 제어", lecture: "파일 접근 권한을 수정합니다.", msg: "권한 함수명을 적어보세요.", req: ["chmod"], guide: "힌트: function chmod()" },
+                { title: "STAGE 10. 스캐너 완성", lecture: "보안 스캔을 최종 실행합니다.", msg: "실행 함수명을 적어보세요.", req: ["runSecurityScan"], guide: "힌트: function runSecurityScan()" }
             ]
         };
 
@@ -375,10 +375,10 @@
 
             await fetch('/api/custom-stages', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, lecture, msg, reqs, tip: guide || "작성 가이드를 참고하세요." })
+                body: JSON.stringify({ title, lecture, msg, reqs, tip: guide || "단서를 참고하세요." })
             });
 
-            alert("강의 등록 완료!");
+            alert("퀴즈 등록 완료!");
             goHome();
         }
 
@@ -403,7 +403,7 @@
 
         function loadTrainingStage() {
             stopLectureVoice();
-            document.getElementById("stage-display").innerText = "LECTURE " + currentStage;
+            document.getElementById("stage-display").innerText = "STAGE " + currentStage;
             document.getElementById("code-input").value = "";
             document.getElementById("feedback").innerText = "";
 
@@ -423,7 +423,7 @@
                 if (customIndex < customStagesList.length) {
                     let cs = customStagesList[customIndex];
                     currentMission = {
-                        title: cs.title || `추가 강의 ${currentStage}`,
+                        title: cs.title || `추가 퀴즈 ${currentStage}`,
                         lectureText: cs.lecture,
                         msg: cs.msg,
                         req: cs.reqs,
@@ -432,7 +432,7 @@
                 } else {
                     currentMission = {
                         title: "🎉 해당 분야 정규 완강!",
-                        lectureText: "선택하신 진로 분야의 모든 강의 과정을 훌륭하게 완수하셨습니다!",
+                        lectureText: "선택하신 진로 분야의 모든 챌린지 과정을 훌륭하게 완수하셨습니다!",
                         msg: "<b>[완강 축하]</b> 멋지게 수료하셨습니다!",
                         req: [],
                         guide: "최고예요!"
@@ -456,7 +456,7 @@
             if (pass) {
                 stopLectureVoice();
                 fb.style.color = "#00ffcc";
-                fb.innerText = "정답입니다! 해독 성공 및 진도 저장 중...";
+                fb.innerText = "정답입니다! 암호 해독 성공 및 진도 저장 중...";
                 if (currentUser) {
                     await fetch('/api/progress', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -466,7 +466,7 @@
                 setTimeout(() => { currentStage++; loadTrainingStage(); }, 1500);
             } else {
                 fb.style.color = "#ff0055";
-                fb.innerText = "앗, 정답이 아닙니다. 위의 해독 풀이 가이드를 다시 읽어보세요!";
+                fb.innerText = "앗, 정답이 아닙니다. 아래 추리 단서를 다시 읽어보세요!";
             }
         }
 
