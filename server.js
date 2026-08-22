@@ -24,7 +24,7 @@ function saveData(file, data) {
 
 let users = loadData(USERS_FILE, { "admin": "1234" });
 let posts = loadData(POSTS_FILE, []);
-let progress = loadData(PROGRESS_FILE, {}); // 유저별 최고 클리어 스테이지 저장
+let progress = loadData(PROGRESS_FILE, {});
 
 app.post('/api/signup', (req, res) => {
     const { id, pw } = req.body;
@@ -55,13 +55,11 @@ app.post('/api/password', (req, res) => {
     }
 });
 
-// 진도율 불러오기
 app.get('/api/progress/:id', (req, res) => {
     const userId = req.params.id;
     res.json({ maxStage: progress[userId] || 1 });
 });
 
-// 진도율 저장하기
 app.post('/api/progress', (req, res) => {
     const { id, stage } = req.body;
     if (!progress[id] || stage > progress[id]) {
