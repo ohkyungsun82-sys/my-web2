@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 코드 공유 스튜디오 (최종 완성본)</title>
+    <title>사이버 탐구 & 코드 공유 스튜디오 (사용자 직접 출제판)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -47,11 +47,22 @@
 
     <div id="app-container">
         <div class="title">사이버 탐구 & 코드 공유 스튜디오</div>
-        <div class="subtitle">실시간 동아리 플랫폼 & 무한 AI 훈련소</div>
+        <div class="subtitle">직접 만드는 스테이지 & 실시간 동아리 플랫폼</div>
 
         <div id="main-menu-screen" class="screen active">
-            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (스테이지 선택 가능)</button>
+            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (스테이지 선택)</button>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 스테이지 직접 만들기 (커스텀 문제 출제)</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
+        </div>
+
+        <!-- 스테이지 직접 만들기 화면 -->
+        <div id="creator-screen" class="screen">
+            <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 스테이지 직접 출제</h3>
+            <textarea id="custom-msg" placeholder="문제 설명 (예: &lt;h2&gt; 태그로 제목을 만들어봐요!)" style="height:70px; font-size:13px;"></textarea>
+            <input type="text" id="custom-reqs" placeholder="필수 포함 키워드 쉼표로 구분 (예: &lt;h2&gt;, &lt;/h2&gt;)" style="font-size:13px;">
+            <textarea id="custom-tip" placeholder="힌트 및 용어 설명 (예: &lt;h2&gt;는 두 번째로 큰 제목 태그입니다.)" style="height:60px; font-size:13px;"></textarea>
+            <button class="action-btn" onclick="saveCustomStage()">문제 등록하기</button>
+            <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
         </div>
 
         <div id="training-screen" class="screen">
@@ -62,7 +73,7 @@
                 </div>
             </div>
             <div class="npc-box">
-                <div style="font-size:35px; margin-right:12px;">🤖</div>
+                <div style="font-size:35px; margin-right:12px;">💡</div>
                 <div id="npc-dialogue" style="font-size:14px; line-height:1.4;">미션 설명</div>
             </div>
             <div class="tip-box" id="tip-display">용어 설명</div>
@@ -190,9 +201,45 @@
         ];
         let currentStage = 1;
         let currentMission = {};
+        let customStagesList = [];
+
+        function openStageCreator() {
+            changeScreen('creator');
+        }
+
+        async function saveCustomStage() {
+            let msg = document.getElementById("custom-msg").value.trim();
+            let reqsStr = document.getElementById("custom-reqs").value.trim();
+            let tip = document.getElementById("custom-tip").value.trim();
+
+            if (!msg || !reqsStr) {
+                alert("문제 설명과 필수 키워드를 입력해주세요!");
+                return;
+            }
+
+            let reqs = reqsStr.split(',').map(s => s.trim());
+
+            await fetch('/api/custom-stages', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ msg, reqs, tip })
+            });
+
+            alert("새로운 스테이지가 성공적으로 등록되었습니다!");
+            document.getElementById("custom-msg").value = "";
+            document.getElementById("custom-reqs").value = "";
+            document.getElementById("custom-tip").value = "";
+            goHome();
+        }
 
         async function openTraining() {
             changeScreen('training');
+            
+            // 서버에서 커스텀 스테이지 목록 가져오기
+            try {
+                let res = await fetch('/api/custom-stages');
+                customStagesList = await res.json();
+            } catch(e) { customStagesList = []; }
+
             if (currentUser) {
                 try {
                     let res = await fetch(`/api/progress/${currentUser}`);
@@ -213,27 +260,21 @@
             if (currentStage <= baseTrainingData.length) {
                 currentMission = baseTrainingData[currentStage - 1];
             } else {
-                const missions = [
-                    {
-                        word: ["CyberSecurity", "HackerWorld", "Developer", "MatrixCode", "NextLevel", "SuperFast"][Math.floor(Math.random() * 6)],
-                        get msg() { return `🤖 <span style='color:#00ffcc;'>[AI 응용 스테이지 ${currentStage}]</span><br>중간 크기 제목인 <span style='color:#ff0055;'>&lt;h2&gt;</span> 태그로 <span style='color:#ff0055;'>${this.word}</span>를 출력해봐!`; },
-                        get req() { return ["<h2>", this.word, "</h2>"]; },
-                        get tip() { return `💡 **AI 튜터 힌트:** <span style='color:#ff0055;'>&lt;h2&gt;${this.word}&lt;/h2&gt;</span> 형식으로 작성해보세요!`; }
-                    },
-                    {
-                        actionName: ["로그인", "시작하기", "클릭", "입장하기", "다음 단계"][Math.floor(Math.random() * 5)],
-                        get msg() { return `🤖 <span style='color:#00ffcc;'>[AI 응용 스테이지 ${currentStage}]</span><br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 만들고, 버튼 안에 글자로 <span style='color:#ff0055;'>${this.actionName}</span>을 적어봐!`; },
-                        get req() { return ["<button>", this.actionName, "</button>"]; },
-                        get tip() { return `💡 **AI 튜터 힌트:** <span style='color:#ff0055;'>&lt;button&gt;${this.actionName}&lt;/button&gt;</span> 모양으로 만들어봐요!`; }
-                    },
-                    {
-                        siteName: ["google", "naver", "github", "daum", "apple"][Math.floor(Math.random() * 5)],
-                        get msg() { return `🤖 <span style='color:#00ffcc;'>[AI 응용 스테이지 ${currentStage}]</span><br>하이퍼링크 태그 <span style='color:#ff0055;'>&lt;a href=&quot;https://${this.siteName}.com&quot;&gt;</span>를 활용해 링크를 만들어봐!`; },
-                        get req() { return ["<a", "href=", `${this.siteName}`]; },
-                        get tip() { return `💡 **AI 튜터 힌트:** <span style='color:#ff0055;'>&lt;a href="https://${this.siteName}.com"&gt;이동&lt;/a&gt;</span> 형태를 써보세요!`; }
-                    }
-                ];
-                currentMission = missions[Math.floor(Math.random() * missions.length)];
+                let customIndex = currentStage - baseTrainingData.length - 1;
+                if (customIndex < customStagesList.length) {
+                    let cs = customStagesList[customIndex];
+                    currentMission = {
+                        msg: `✏️ <span style='color:#00ffcc;'>[직접 출제 스테이지 ${currentStage}]</span><br>${cs.msg}`,
+                        req: cs.reqs,
+                        tip: `💡 **출제자 힌트:** ${cs.tip || "등록된 힌트가 없습니다."}`
+                    };
+                } else {
+                    currentMission = {
+                        msg: `🎉 <span style='color:#00ffcc;'>모든 스테이지를 클리어했습니다!</span><br>메인 메뉴에서 새로운 문제를 직접 더 만들어보세요!`,
+                        req: [],
+                        tip: "💡 완벽합니다!"
+                    };
+                }
             }
 
             document.getElementById("npc-dialogue").innerHTML = currentMission.msg;
@@ -241,6 +282,7 @@
         }
 
         async function checkCode() {
+            if (!currentMission.req || currentMission.req.length === 0) return;
             let code = document.getElementById("code-input").value;
             let pass = true;
             for (let i = 0; i < currentMission.req.length; i++) {
