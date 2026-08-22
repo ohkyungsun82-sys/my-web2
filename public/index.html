@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이버 탐구 & 코드 공유 스튜디오</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        #app-container { width: 90%; max-width: 700px; background: #1e1e1e; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); padding: 25px; border: 2px solid #333; box-sizing: border-box; }
+        .title { font-family: 'Black Han Sans', sans-serif; font-size: 26px; color: #00ffcc; margin-bottom: 5px; text-align: center; }
+        .subtitle { color: #aaa; margin-bottom: 20px; font-size: 13px; text-align: center; }
+        .screen { display: none; }
+        .active { display: block; }
+        .menu-btn, .action-btn { display: block; width: 100%; background: #2a2a2a; color: #fff; border: 2px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: left; }
+        .menu-btn:hover { background: #00ffcc; color: #000; border-color: #00ffcc; }
+        .box { background: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
+        input[type="text"], input[type="password"], textarea { width: 100%; background: #000; color: #00ffcc; border: 2px solid #444; border-radius: 8px; padding: 12px; font-size: 15px; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
+        input:focus, textarea:focus { outline: none; border-color: #00ffcc; }
+        .action-btn { background: #ff0055; text-align: center; font-size: 16px; margin-top: 5px; }
+        .sub-btn { background: #444; }
+        .switch-link { text-align: center; margin-top: 15px; font-size: 13px; color: #aaa; cursor: pointer; }
+        .switch-link span { color: #00ffcc; font-weight: bold; text-decoration: underline; }
+        
+        /* 훈련소 스타일 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .stage-badge { background: #ff0055; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        .npc-box { background: #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; margin-bottom: 12px; border-left: 5px solid #00ffcc; }
+        .tip-box { background: #111; border: 1px dashed #00ffcc; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; color: #00ffcc; }
+
+        .user-info { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
+        .admin-badge { background: #ff0055; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .board-container { max-height: 180px; overflow-y: auto; margin-top: 15px; }
+        .post-card { background: #252525; border-left: 4px solid #00ffcc; padding: 10px; border-radius: 6px; margin-bottom: 8px; position: relative; }
+        .post-author { font-weight: bold; color: #00ffcc; font-size: 12px; margin-bottom: 3px; }
+        .post-title { font-weight: bold; font-size: 13px; margin-bottom: 5px; color: #fff; }
+        .delete-btn { position: absolute; top: 8px; right: 8px; background: #ff4444; color: #fff; border: none; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .run-code-btn { background: #00bfff; color: #000; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 4px; }
+        .admin-panel { background: #221515; border: 1px solid #ff0055; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: #111; padding: 6px 10px; border-radius: 5px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: #1e1e1e; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; border: 2px solid #00ffcc; box-sizing: border-box; text-align: center; }
+        .preview-frame { width: 100%; height: 280px; background: #fff; border-radius: 8px; border: none; margin-top: 10px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <div id="app-container">
+        <div class="title">사이버 탐구 & 코드 공유 스튜디오</div>
+        <div class="subtitle">학습부터 실시간 코드 공유까지 완벽 통합</div>
+
+        <!-- 메인 메뉴 -->
+        <div id="main-menu-screen" class="screen active">
+            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (HTML 기초 학습)</button>
+            <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
+        </div>
+
+        <!-- 훈련소 화면 -->
+        <div id="training-screen" class="screen">
+            <div class="header">
+                <div class="stage-badge" id="stage-display">STAGE 1</div>
+                <div style="color:#00ffcc; font-weight:bold;">HTML</div>
+            </div>
+            <div class="npc-box">
+                <div style="font-size:35px; margin-right:12px;">💡</div>
+                <div id="npc-dialogue" style="font-size:14px; line-height:1.4;">미션 설명</div>
+            </div>
+            <div class="tip-box" id="tip-display">용어 설명</div>
+            <textarea id="code-input" placeholder="여기에 코드를 입력하세요!" style="height:90px;"></textarea>
+            <button class="action-btn" onclick="checkCode()">▶ 코드 실행하기</button>
+            <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
+            <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
+        </div>
+
+        <!-- 로그인 화면 -->
+        <div id="login-screen" class="screen">
+            <div class="box">
+                <h3 style="margin-top:0; color:#00ffcc; text-align:center;">커뮤니티 로그인</h3>
+                <input type="text" id="login-id" placeholder="아이디">
+                <input type="password" id="login-pw" placeholder="비밀번호">
+                <button class="action-btn" onclick="processLogin()">로그인</button>
+                <div class="switch-link" onclick="changeScreen('signup')">계정이 없나요? <span>회원가입하기</span></div>
+                <button class="action-btn sub-btn" onclick="goHome()">메인으로</button>
+            </div>
+        </div>
+
+        <!-- 회원가입 화면 -->
+        <div id="signup-screen" class="screen">
+            <div class="box">
+                <h3 style="margin-top:0; color:#00ffcc; text-align:center;">회원가입</h3>
+                <input type="text" id="signup-id" placeholder="아이디 (관리자는 admin)">
+                <input type="password" id="signup-pw" placeholder="비밀번호">
+                <button class="action-btn" onclick="processSignup()">가입 완료</button>
+                <div class="switch-link" onclick="changeScreen('login')">이미 계정이 있나요? <span>로그인하기</span></div>
+                <button class="action-btn sub-btn" onclick="goHome()">메인으로</button>
+            </div>
+        </div>
+
+        <!-- 게시판 스튜디오 화면 -->
+        <div id="board-screen" class="screen">
+            <div class="user-info">
+                <div>계정: <b id="display-user" style="color:#00ffcc;"></b> <span id="badge-area"></span></div>
+                <div>
+                    <button onclick="openChangePwModal()" style="background:none; border:none; color:#00ffcc; cursor:pointer; font-size:11px; margin-right:3px;">비번변경</button>
+                    <button onclick="showQrCode()" style="background:none; border:none; color:#00ffcc; cursor:pointer; font-size:11px; margin-right:3px;">QR로그인</button>
+                    <button onclick="processLogout()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:11px;">로그아웃</button>
+                </div>
+            </div>
+
+            <div id="pw-change-box" style="display:none; background:#252525; padding:10px; border-radius:8px; margin-bottom:10px;">
+                <input type="password" id="current-pw-input" placeholder="현재 비밀번호" style="margin-bottom:5px; font-size:12px; padding:7px;">
+                <input type="password" id="new-pw-input" placeholder="새 비밀번호" style="margin-bottom:5px; font-size:12px; padding:7px;">
+                <button class="action-btn" onclick="updatePassword()" style="padding:6px; font-size:12px;">변경하기</button>
+            </div>
+
+            <input type="text" id="code-title" placeholder="웹페이지 제목" style="margin-bottom:6px; padding:8px; font-size:13px;">
+            <textarea id="html-code-input" placeholder="&lt;h1&gt;내 코드&lt;/h1&gt;" style="height:70px; margin-bottom:6px;"></textarea>
+            <button class="action-btn" onclick="shareCode()" style="padding:8px; font-size:14px;">코드 공유하기</button>
+
+            <div style="margin-top:12px; font-size:13px; font-weight:bold; color:#00ffcc;">🌍 실시간 공유된 목록</div>
+            <div class="board-container" id="posts-container"></div>
+
+            <div id="admin-control-panel" class="admin-panel" style="display:none;">
+                <div style="font-weight:bold; color:#ff0055; margin-bottom:6px;">⚙️ 관리자: 회원 관리</div>
+                <div id="user-list-container"></div>
+            </div>
+            
+            <button class="action-btn sub-btn" onclick="goHome()" style="font-size:12px; padding:5px; margin-top:10px;">메인으로</button>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title" style="color:#00ffcc; margin-top:0; font-size:16px;">미리보기</h3>
+            <iframe class="preview-frame" id="preview-frame"></iframe>
+            <button class="action-btn" onclick="closePreview()" style="margin-top:10px; padding:8px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#00ffcc; margin-top:0;">QR 로그인</h3>
+            <div id="qrcode-box" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:10px; border-radius:8px;"></div>
+            <button class="action-btn" onclick="closeQrModal()" style="padding:8px; font-size:14px;">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = localStorage.getItem("active_user") || null;
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const qrUser = urlParams.get('qr');
+            if (qrUser) {
+                currentUser = qrUser;
+                localStorage.setItem("active_user", qrUser);
+                alert(`QR 코드로 '${qrUser}' 계정 로그인 완료!`);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        };
+
+        function changeScreen(name) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(name + '-screen').classList.add('active');
+        }
+
+        function goHome() {
+            document.getElementById("pw-change-box").style.display = "none";
+            changeScreen('main-menu');
+        }
+
+        // [코딩 공부 훈련소 로직]
+        const trainingData = [
+            { msg: "가장 큰 제목을 만들어보자!<br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Hello</span>를 적어봐.", req: ["<h1>", "Hello", "</h1>"], tip: "💡 **&lt;h1&gt;이란?** 가장 커다란 제목 글자를 만들 때 쓰는 태그야." },
+            { msg: "누를 수 있는 버튼을 만들자!<br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 써봐.", req: ["<button>", "</button>"], tip: "💡 **태그란?** 컴퓨터에게 버튼을 만들어달라고 명령하는 상자야." },
+            { msg: "글자를 입력받는 빈 칸을 만들어보자.<br><span style='color:#ff0055;'>&lt;input&gt;</span> 태그를 적어봐.", req: ["<input>"], tip: "💡 **&lt;input&gt;이란?** 사용자가 글자를 칠 수 있는 네모 칸을 만들어줘." },
+            { msg: "링크를 만들어보자!<br><span style='color:#ff0055;'>&lt;a href=&quot;&quot;&gt;</span> 태그를 써봐.", req: ["<a", "href="], tip: "💡 **href가 뭐야?** 이동할 인터넷 주소를 뜻하는 속성이야!" },
+            { msg: "사진을 띄워보자!<br><span style='color:#ff0055;'>&lt;img src=&quot;&quot;&gt;</span> 태그를 적어봐.", req: ["<img", "src="], tip: "💡 **src가 뭐야?** 사진 파일의 위치를 알려주는 속성이야!" }
+        ];
+        let currentStage = 1;
+
+        function openTraining() {
+            changeScreen('training');
+            currentStage = 1;
+            loadTrainingStage();
+        }
+
+        function loadTrainingStage() {
+            document.getElementById("stage-display").innerText = "STAGE " + currentStage;
+            document.getElementById("code-input").value = "";
+            document.getElementById("feedback").innerText = "";
+            if (currentStage <= trainingData.length) {
+                let info = trainingData[currentStage - 1];
+                document.getElementById("npc-dialogue").innerHTML = info.msg;
+                document.getElementById("tip-display").innerHTML = info.tip;
+            } else {
+                document.getElementById("npc-dialogue").innerHTML = "🎉 모든 기초 훈련을 완벽하게 클리어했습니다!";
+                document.getElementById("tip-display").innerHTML = "💡 이제 코드 공유 스튜디오를 이용해보세요.";
+            }
+        }
+
+        function checkCode() {
+            if (currentStage > trainingData.length) return;
+            let code = document.getElementById("code-input").value;
+            let info = trainingData[currentStage - 1];
+            let pass = true;
+            for (let i = 0; i < info.req.length; i++) {
+                if (!code.includes(info.req[i])) { pass = false; break; }
+            }
+            let fb = document.getElementById("feedback");
+            if (pass) {
+                fb.style.color = "#00ffcc";
+                fb.innerText = "미션 성공! 다음 스테이지로 이동합니다...";
+                setTimeout(() => { currentStage++; loadTrainingStage(); }, 2000);
+            } else {
+                fb.style.color = "#ff0055";
+                fb.innerText = "앗, 힌트를 다시 확인하고 코드를 고쳐보세요!";
+            }
+        }
+
+        // [커뮤니티 로직]
+        function checkLoginStatus() {
+            if (currentUser) {
+                showBoardScreen(currentUser);
+            } else {
+                changeScreen('login');
+            }
+        }
+
+        async function processSignup() {
+            let id = document.getElementById("signup-id").value.trim();
+            let pw = document.getElementById("signup-pw").value.trim();
+            let res = await fetch('/api/signup', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, pw })
+            });
+            let data = await res.json();
+            if (data.success) { alert("가입 완료!"); changeScreen('login'); }
+            else { alert(data.msg); }
+        }
+
+        async function processLogin() {
+            let id = document.getElementById("login-id").value.trim();
+            let pw = document.getElementById("login-pw").value.trim();
+            let res = await fetch('/api/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, pw })
+            });
+            let data = await res.json();
+            if (data.success) {
+                currentUser = id;
+                localStorage.setItem("active_user", id);
+                showBoardScreen(id);
+            } else { alert("로그인 실패"); }
+        }
+
+        function showBoardScreen(user) {
+            changeScreen('board');
+            document.getElementById("display-user").innerText = user;
+            let isAdmin = (user.toLowerCase() === 'admin');
+            document.getElementById("badge-area").innerHTML = isAdmin ? "<span class='admin-badge'>관리자</span>" : "";
+            document.getElementById("admin-control-panel").style.display = isAdmin ? "block" : "none";
+            if (isAdmin) loadUsers();
+            loadPosts();
+        }
+
+        function processLogout() {
+            currentUser = null;
+            localStorage.removeItem("active_user");
+            changeScreen('login');
+        }
+
+        async function shareCode() {
+            let title = document.getElementById("code-title").value.trim();
+            let code = document.getElementById("html-code-input").value.trim();
+            if (!title || !code) return alert("입력 오류");
+
+            await fetch('/api/posts', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author: currentUser, title, code })
+            });
+            document.getElementById("code-title").value = "";
+            document.getElementById("html-code-input").value = "";
+            loadPosts();
+        }
+
+        async function loadPosts() {
+            let res = await fetch('/api/posts');
+            let posts = await res.json();
+            let container = document.getElementById("posts-container");
+            let isAdmin = (currentUser && currentUser.toLowerCase() === 'admin');
+
+            if (posts.length === 0) { container.innerHTML = "<div style='text-align:center; color:#666;'>공유된 코드 없음</div>"; return; }
+
+            let html = "";
+            posts.forEach(p => {
+                let canDel = isAdmin || (p.author === currentUser);
+                html += `
+                    <div class="post-card">
+                        <div class="post-author">${p.author}</div>
+                        <div class="post-title">${p.title}</div>
+                        <button class="run-code-btn" onclick="runPreview('${encodeURIComponent(p.title)}', '${encodeURIComponent(p.code)}')">실행 보기</button>
+                        ${canDel ? `<button class="delete-btn" onclick="deletePost(${p.id})">삭제</button>` : ''}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        async function deletePost(id) {
+            let isAdmin = (currentUser.toLowerCase() === 'admin');
+            await fetch(`/api/posts/${id}`, {
+                method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: currentUser, isAdmin })
+            });
+            loadPosts();
+        }
+
+        async function loadUsers() {
+            let res = await fetch('/api/users');
+            let users = await res.json();
+            let container = document.getElementById("user-list-container");
+            let html = "";
+            for (let id in users) {
+                if (id.toLowerCase() !== 'admin') {
+                    html += `<div class="user-row"><span>${id}</span><button onclick="deleteUser('${id}')" style="background:#ff4444; color:#fff; border:none; padding:3px;">삭제</button></div>`;
+                }
+            }
+            container.innerHTML = html || "회원 없음";
+        }
+
+        async function deleteUser(id) {
+            await fetch(`/api/users/${id}`, { method: 'DELETE' });
+            loadUsers();
+            loadPosts();
+        }
+
+        function openChangePwModal() {
+            let box = document.getElementById("pw-change-box");
+            box.style.display = box.style.display === "none" ? "block" : "none";
+        }
+
+        async function updatePassword() {
+            let currentPw = document.getElementById("current-pw-input").value;
+            let newPw = document.getElementById("new-pw-input").value;
+            let res = await fetch('/api/password', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentUser, currentPw, newPw })
+            });
+            let data = await res.json();
+            if (data.success) { alert("변경 완료"); openChangePwModal(); }
+            else { alert(data.msg); }
+        }
+
+        function showQrCode() {
+            let box = document.getElementById("qrcode-box");
+            box.innerHTML = "";
+            new QRCode(box, { text: window.location.href.split('?')[0] + "?qr=" + currentUser, width: 140, height: 140 });
+            document.getElementById("qr-modal").style.display = "flex";
+        }
+
+        function closeQrModal() { document.getElementById("qr-modal").style.display = "none"; }
+        function runPreview(t, c) {
+            document.getElementById("modal-title").innerText = decodeURIComponent(t);
+            let iframe = document.getElementById("preview-frame");
+            document.getElementById("preview-modal").style.display = "flex";
+            let doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open(); doc.write(decodeURIComponent(c)); doc.close();
+        }
+        function closePreview() { document.getElementById("preview-modal").style.display = "none"; }
+    </script>
+</body>
+</html>
