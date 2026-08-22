@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 코드 공유 스튜디오 (사용자 직접 출제판)</title>
+    <title>사이버 탐구 & 코드 공유 스튜디오 (80분 정규판)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -47,20 +47,19 @@
 
     <div id="app-container">
         <div class="title">사이버 탐구 & 코드 공유 스튜디오</div>
-        <div class="subtitle">직접 만드는 스테이지 & 실시간 동아리 플랫폼</div>
+        <div class="subtitle">80분 동아리 탐구 & 정식 10단계 훈련소</div>
 
         <div id="main-menu-screen" class="screen active">
-            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (스테이지 선택)</button>
-            <button class="menu-btn" onclick="openStageCreator()">✏️ 스테이지 직접 만들기 (커스텀 문제 출제)</button>
+            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (정식 10단계)</button>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 스테이지 직접 만들기 (추가 문제 출제)</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
         </div>
 
-        <!-- 스테이지 직접 만들기 화면 -->
         <div id="creator-screen" class="screen">
             <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 스테이지 직접 출제</h3>
             <textarea id="custom-msg" placeholder="문제 설명 (예: &lt;h2&gt; 태그로 제목을 만들어봐요!)" style="height:70px; font-size:13px;"></textarea>
             <input type="text" id="custom-reqs" placeholder="필수 포함 키워드 쉼표로 구분 (예: &lt;h2&gt;, &lt;/h2&gt;)" style="font-size:13px;">
-            <textarea id="custom-tip" placeholder="힌트 및 용어 설명 (예: &lt;h2&gt;는 두 번째로 큰 제목 태그입니다.)" style="height:60px; font-size:13px;"></textarea>
+            <textarea id="custom-tip" placeholder="힌트 및 용어 설명" style="height:60px; font-size:13px;"></textarea>
             <button class="action-btn" onclick="saveCustomStage()">문제 등록하기</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
         </div>
@@ -192,12 +191,18 @@
             changeScreen('main-menu');
         }
 
+        // 80분 수업을 꽉 채워줄 정식 10단계 훈련소 문제들
         const baseTrainingData = [
-            { msg: "가장 큰 제목을 만들어보자!<br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Hello</span>를 적어봐.", req: ["<h1>", "Hello", "</h1>"], tip: "💡 **&lt;h1&gt;이란?** 가장 커다란 제목 글자를 만들 때 쓰는 태그야." },
-            { msg: "누를 수 있는 버튼을 만들자!<br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 써봐.", req: ["<button>", "</button>"], tip: "💡 **태그란?** 컴퓨터에게 버튼을 만들어달라고 명령하는 상자야." },
-            { msg: "글자를 입력받는 빈 칸을 만들어보자.<br><span style='color:#ff0055;'>&lt;input&gt;</span> 태그를 적어봐.", req: ["<input>"], tip: "💡 **&lt;input&gt;이란?** 사용자가 글자를 칠 수 있는 네모 칸을 만들어줘." },
-            { msg: "링크를 만들어보자!<br><span style='color:#ff0055;'>&lt;a href=&quot;&quot;&gt;</span> 태그를 써봐.", req: ["<a", "href="], tip: "💡 **href가 뭐야?** 이동할 인터넷 주소를 뜻하는 속성이야!" },
-            { msg: "사진을 띄워보자!<br><span style='color:#ff0055;'>&lt;img src=&quot;&quot;&gt;</span> 태그를 적어봐.", req: ["<img", "src="], tip: "💡 **src가 뭐야?** 사진 파일의 위치를 알려주는 속성이야!" }
+            { msg: "STAGE 1: 가장 큰 제목을 만들어보자!<br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Hello</span>를 적어봐.", req: ["<h1>", "Hello", "</h1>"], tip: "💡 **&lt;h1&gt;이란?** 가장 커다란 제목 글자를 만들 때 쓰는 태그야." },
+            { msg: "STAGE 2: 중간 크기 제목도 써보자!<br><span style='color:#ff0055;'>&lt;h2&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Cyber</span>를 적어봐.", req: ["<h2>", "Cyber", "</h2>"], tip: "💡 **&lt;h2&gt;란?** h1보다 한 단계 작은 부제목 태그야." },
+            { msg: "STAGE 3: 일반 본문 글자를 남겨보자!<br><span style='color:#ff0055;'>&lt;p&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Welcome</span>을 적어봐.", req: ["<p>", "Welcome", "</p>"], tip: "💡 **&lt;p&gt;란?** 문단(Paragraph)을 만들 때 사용하는 가장 기본적인 텍스트 태그야." },
+            { msg: "STAGE 4: 누를 수 있는 버튼을 만들자!<br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 써봐.", req: ["<button>", "</button>"], tip: "💡 **태그란?** 컴퓨터에게 버튼을 만들어달라고 명령하는 상자야." },
+            { msg: "STAGE 5: 글자를 입력받는 빈 칸을 만들어보자.<br><span style='color:#ff0055;'>&lt;input&gt;</span> 태그를 적어봐.", req: ["<input>"], tip: "💡 **&lt;input&gt;이란?** 사용자가 글자를 칠 수 있는 네모 칸을 만들어줘." },
+            { msg: "STAGE 6: 다른 사이트로 이동하는 링크를 만들자!<br><span style='color:#ff0055;'>&lt;a href=&quot;&quot;&gt;</span> 태그를 써봐.", req: ["<a", "href="], tip: "💡 **href가 뭐야?** 이동할 인터넷 주소를 뜻하는 속성이야!" },
+            { msg: "STAGE 7: 웹페이지에 사진을 띄워보자!<br><span style='color:#ff0055;'>&lt;img src=&quot;&quot;&gt;</span> 태그를 적어봐.", req: ["<img", "src="], tip: "💡 **src가 뭐야?** 사진 파일의 위치를 알려주는 속성이야!" },
+            { msg: "STAGE 8: 목록을 점(Bullet)으로 나열해보자!<br><span style='color:#ff0055;'>&lt;ul&gt;</span>과 <span style='color:#ff0055;'>&lt;li&gt;</span> 태그를 써봐.", req: ["<ul>", "<li>", "</li>", "</ul>"], tip: "💡 **목록 태그:** 순서가 없는 목록(Unordered List)을 만들 때 써." },
+            { msg: "STAGE 9: 글자 색상을 꾸미는 스타일을 넣어보자!<br><span style='color:#ff0055;'>style=&quot;color: red;&quot;</span> 속성을 써봐.", req: ["style=", "color:"], tip: "💡 **style 속성:** CSS 스타일을 직접 적용할 때 사용하는 마법의 속성이야!" },
+            { msg: "STAGE 10: 배경색을 바꾸는 웹페이지를 완성하자!<br><span style='color:#ff0055;'>background-color</span> 속성을 써봐.", req: ["background-color"], tip: "💡 **배경색 지정:** 웹페이지나 상자의 배경 색상을 멋지게 꾸며줄 수 있어!" }
         ];
         let currentStage = 1;
         let currentMission = {};
@@ -234,7 +239,6 @@
         async function openTraining() {
             changeScreen('training');
             
-            // 서버에서 커스텀 스테이지 목록 가져오기
             try {
                 let res = await fetch('/api/custom-stages');
                 customStagesList = await res.json();
@@ -264,15 +268,15 @@
                 if (customIndex < customStagesList.length) {
                     let cs = customStagesList[customIndex];
                     currentMission = {
-                        msg: `✏️ <span style='color:#00ffcc;'>[직접 출제 스테이지 ${currentStage}]</span><br>${cs.msg}`,
+                        msg: `✏️ <span style='color:#00ffcc;'>[추가 출제 스테이지 ${currentStage}]</span><br>${cs.msg}`,
                         req: cs.reqs,
                         tip: `💡 **출제자 힌트:** ${cs.tip || "등록된 힌트가 없습니다."}`
                     };
                 } else {
                     currentMission = {
-                        msg: `🎉 <span style='color:#00ffcc;'>모든 스테이지를 클리어했습니다!</span><br>메인 메뉴에서 새로운 문제를 직접 더 만들어보세요!`,
+                        msg: `🎉 <span style='color:#00ffcc;'>모든 스테이지를 완벽하게 클리어했습니다!</span><br>메인 메뉴에서 문제를 직접 더 만들어보세요!`,
                         req: [],
-                        tip: "💡 완벽합니다!"
+                        tip: "💡 최고입니다!"
                     };
                 }
             }

@@ -26,7 +26,7 @@ function saveData(file, data) {
 let users = loadData(USERS_FILE, { "admin": "1234" });
 let posts = loadData(POSTS_FILE, []);
 let progress = loadData(PROGRESS_FILE, {});
-let customStages = loadData(STAGES_FILE, []); // 사용자가 직접 만든 스테이지 목록
+let customStages = loadData(STAGES_FILE, []);
 
 app.post('/api/signup', (req, res) => {
     const { id, pw } = req.body;
@@ -71,7 +71,6 @@ app.post('/api/progress', (req, res) => {
     res.json({ success: true });
 });
 
-// 커스텀 스테이지 불러오기/저장하기
 app.get('/api/custom-stages', (req, res) => {
     res.json(customStages);
 });
