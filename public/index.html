@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사이버 탐구 & 코드 공유 스튜디오 (80분 정규판)</title>
+    <title>사이버 탐구 & 웹개발 실전 강의 스튜디오</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
         body { margin: 0; padding: 0; background-color: #121212; color: #fff; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-        #app-container { width: 90%; max-width: 700px; background: #1e1e1e; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); padding: 25px; border: 2px solid #333; box-sizing: border-box; }
+        #app-container { width: 90%; max-width: 750px; background: #1e1e1e; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); padding: 25px; border: 2px solid #333; box-sizing: border-box; }
         .title { font-family: 'Black Han Sans', sans-serif; font-size: 26px; color: #00ffcc; margin-bottom: 5px; text-align: center; }
         .subtitle { color: #aaa; margin-bottom: 20px; font-size: 13px; text-align: center; }
         .screen { display: none; }
@@ -24,9 +24,11 @@
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
         .stage-badge { background: #ff0055; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
-        .npc-box { background: #2a2a2a; padding: 15px; border-radius: 12px; display: flex; align-items: center; margin-bottom: 12px; border-left: 5px solid #00ffcc; }
-        .tip-box { background: #111; border: 1px dashed #00ffcc; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; color: #00ffcc; }
-
+        
+        /* 강의실 스타일 */
+        .lecture-card { background: #252525; border: 1px solid #00ffcc; padding: 15px; border-radius: 10px; margin-bottom: 12px; line-height: 1.6; font-size: 14px; }
+        .lecture-title { color: #00ffcc; font-weight: bold; font-size: 17px; margin-bottom: 8px; }
+        
         .user-info { display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
         .admin-badge { background: #ff0055; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; }
         .board-container { max-height: 180px; overflow-y: auto; margin-top: 15px; }
@@ -46,40 +48,44 @@
 <body>
 
     <div id="app-container">
-        <div class="title">사이버 탐구 & 코드 공유 스튜디오</div>
-        <div class="subtitle">80분 동아리 탐구 & 정식 10단계 훈련소</div>
+        <div class="title">사이버 탐구 & 웹개발 실전 강의 스튜디오</div>
+        <div class="subtitle">80분 정규 강의 코스 & 실시간 코드 공유 플랫폼</div>
 
         <div id="main-menu-screen" class="screen active">
-            <button class="menu-btn" onclick="openTraining()">🎮 코딩 공부 훈련소 (정식 10단계)</button>
-            <button class="menu-btn" onclick="openStageCreator()">✏️ 스테이지 직접 만들기 (추가 문제 출제)</button>
+            <button class="menu-btn" onclick="openTraining()">📖 웹개발 실전 강의실 (단계별 강의 및 실습)</button>
+            <button class="menu-btn" onclick="openStageCreator()">✏️ 나만의 강의/실습 직접 만들기</button>
             <button class="menu-btn" onclick="checkLoginStatus()">💬 동아리 코드 공유 스튜디오 (로그인 & 게시판)</button>
         </div>
 
-        <div id="creator-screen" class="screen">
-            <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 스테이지 직접 출제</h3>
-            <textarea id="custom-msg" placeholder="문제 설명 (예: &lt;h2&gt; 태그로 제목을 만들어봐요!)" style="height:70px; font-size:13px;"></textarea>
-            <input type="text" id="custom-reqs" placeholder="필수 포함 키워드 쉼표로 구분 (예: &lt;h2&gt;, &lt;/h2&gt;)" style="font-size:13px;">
-            <textarea id="custom-tip" placeholder="힌트 및 용어 설명" style="height:60px; font-size:13px;"></textarea>
-            <button class="action-btn" onclick="saveCustomStage()">문제 등록하기</button>
-            <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
-        </div>
-
+        <!-- 강의실 화면 -->
         <div id="training-screen" class="screen">
             <div class="header">
-                <div class="stage-badge" id="stage-display">STAGE 1</div>
+                <div class="stage-badge" id="stage-display">LECTURE 1</div>
                 <div>
-                    <button onclick="openStageSelectModal()" style="background:#00ffcc; color:#000; border:none; padding:4px 8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">📌 스테이지 선택</button>
+                    <button onclick="openStageSelectModal()" style="background:#00ffcc; color:#000; border:none; padding:4px 8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">📌 강의 선택</button>
                 </div>
             </div>
-            <div class="npc-box">
-                <div style="font-size:35px; margin-right:12px;">💡</div>
-                <div id="npc-dialogue" style="font-size:14px; line-height:1.4;">미션 설명</div>
+            
+            <!-- 개념 강의 내용 출력 영역 -->
+            <div class="lecture-card" id="lecture-content-box">
+                <div class="lecture-title" id="lec-title">강의 제목</div>
+                <div id="lec-body">강의 설명 내용이 들어갑니다.</div>
             </div>
-            <div class="tip-box" id="tip-display">용어 설명</div>
-            <textarea id="code-input" placeholder="여기에 코드를 입력하세요!" style="height:90px;"></textarea>
-            <button class="action-btn" onclick="checkCode()">▶ 코드 실행하기</button>
+
+            <textarea id="code-input" placeholder="강의를 읽고 여기에 실습 코드를 입력하세요!" style="height:90px;"></textarea>
+            <button class="action-btn" onclick="checkCode()">▶ 실습 결과 확인하기</button>
             <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
             <div id="feedback" style="margin-top:8px; font-weight:bold; text-align:center; font-size:13px; min-height:18px;"></div>
+        </div>
+
+        <div id="creator-screen" class="screen">
+            <h3 style="color:#00ffcc; margin-top:0; text-align:center;">✏️ 새로운 강의 및 실습 만들기</h3>
+            <input type="text" id="custom-title" placeholder="강의 주제 이름 (예: 3강. 나만의 버튼 만들기)" style="font-size:13px;">
+            <textarea id="custom-lecture" placeholder="[개념 강의 내용] 학생들에게 설명할 내용을 적어주세요." style="height:70px; font-size:13px;"></textarea>
+            <textarea id="custom-msg" placeholder="[실습 미션 설명] 학생들이 해야 할 행동을 적어주세요." style="height:50px; font-size:13px;"></textarea>
+            <input type="text" id="custom-reqs" placeholder="필수 포함 키워드 쉼표로 구분 (예: &lt;button&gt;, &lt;/button&gt;)" style="font-size:13px;">
+            <button class="action-btn" onclick="saveCustomStage()">강의 등록하기</button>
+            <button class="action-btn sub-btn" onclick="goHome()">🏠 메인 메뉴로</button>
         </div>
 
         <div id="login-screen" class="screen">
@@ -138,8 +144,8 @@
 
     <div id="stage-modal" class="modal">
         <div class="modal-content">
-            <h3 style="color:#00ffcc; margin-top:0;">📌 스테이지 선택</h3>
-            <p style="font-size:12px; color:#aaa;">이동할 스테이지 번호를 입력하세요!</p>
+            <h3 style="color:#00ffcc; margin-top:0;">📌 강의 선택</h3>
+            <p style="font-size:12px; color:#aaa;">이동할 강의 번호를 입력하세요!</p>
             <input type="number" id="target-stage-input" min="1" value="1" style="text-align:center; font-size:18px;">
             <button class="action-btn" onclick="jumpToStage()" style="padding:8px; font-size:14px; margin-bottom:5px;">이동하기</button>
             <button class="action-btn sub-btn" onclick="closeStageModal()" style="padding:8px; font-size:14px;">닫기</button>
@@ -191,19 +197,70 @@
             changeScreen('main-menu');
         }
 
-        // 80분 수업을 꽉 채워줄 정식 10단계 훈련소 문제들
-        const baseTrainingData = [
-            { msg: "STAGE 1: 가장 큰 제목을 만들어보자!<br><span style='color:#ff0055;'>&lt;h1&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Hello</span>를 적어봐.", req: ["<h1>", "Hello", "</h1>"], tip: "💡 **&lt;h1&gt;이란?** 가장 커다란 제목 글자를 만들 때 쓰는 태그야." },
-            { msg: "STAGE 2: 중간 크기 제목도 써보자!<br><span style='color:#ff0055;'>&lt;h2&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Cyber</span>를 적어봐.", req: ["<h2>", "Cyber", "</h2>"], tip: "💡 **&lt;h2&gt;란?** h1보다 한 단계 작은 부제목 태그야." },
-            { msg: "STAGE 3: 일반 본문 글자를 남겨보자!<br><span style='color:#ff0055;'>&lt;p&gt;</span> 태그를 써서 <span style='color:#ff0055;'>Welcome</span>을 적어봐.", req: ["<p>", "Welcome", "</p>"], tip: "💡 **&lt;p&gt;란?** 문단(Paragraph)을 만들 때 사용하는 가장 기본적인 텍스트 태그야." },
-            { msg: "STAGE 4: 누를 수 있는 버튼을 만들자!<br><span style='color:#ff0055;'>&lt;button&gt;</span> 태그를 써봐.", req: ["<button>", "</button>"], tip: "💡 **태그란?** 컴퓨터에게 버튼을 만들어달라고 명령하는 상자야." },
-            { msg: "STAGE 5: 글자를 입력받는 빈 칸을 만들어보자.<br><span style='color:#ff0055;'>&lt;input&gt;</span> 태그를 적어봐.", req: ["<input>"], tip: "💡 **&lt;input&gt;이란?** 사용자가 글자를 칠 수 있는 네모 칸을 만들어줘." },
-            { msg: "STAGE 6: 다른 사이트로 이동하는 링크를 만들자!<br><span style='color:#ff0055;'>&lt;a href=&quot;&quot;&gt;</span> 태그를 써봐.", req: ["<a", "href="], tip: "💡 **href가 뭐야?** 이동할 인터넷 주소를 뜻하는 속성이야!" },
-            { msg: "STAGE 7: 웹페이지에 사진을 띄워보자!<br><span style='color:#ff0055;'>&lt;img src=&quot;&quot;&gt;</span> 태그를 적어봐.", req: ["<img", "src="], tip: "💡 **src가 뭐야?** 사진 파일의 위치를 알려주는 속성이야!" },
-            { msg: "STAGE 8: 목록을 점(Bullet)으로 나열해보자!<br><span style='color:#ff0055;'>&lt;ul&gt;</span>과 <span style='color:#ff0055;'>&lt;li&gt;</span> 태그를 써봐.", req: ["<ul>", "<li>", "</li>", "</ul>"], tip: "💡 **목록 태그:** 순서가 없는 목록(Unordered List)을 만들 때 써." },
-            { msg: "STAGE 9: 글자 색상을 꾸미는 스타일을 넣어보자!<br><span style='color:#ff0055;'>style=&quot;color: red;&quot;</span> 속성을 써봐.", req: ["style=", "color:"], tip: "💡 **style 속성:** CSS 스타일을 직접 적용할 때 사용하는 마법의 속성이야!" },
-            { msg: "STAGE 10: 배경색을 바꾸는 웹페이지를 완성하자!<br><span style='color:#ff0055;'>background-color</span> 속성을 써봐.", req: ["background-color"], tip: "💡 **배경색 지정:** 웹페이지나 상자의 배경 색상을 멋지게 꾸며줄 수 있어!" }
+        // 80분 수업을 위한 꽉 찬 정식 강의 커리큘럼
+        const baseLectures = [
+            {
+                title: "1강. HTML과 웹페이지의 기본 뼈대 만들기",
+                lecture: "안녕하세요! 오늘 80분 동안 우리는 나만의 웹사이트를 직접 만들어볼 겁니다. 웹페이지의 가장 큰 제목은 <b>&lt;h1&gt;</b> 태그를 사용합니다. 여는 태그가 있으면 반드시 <b>&lt;/h1&gt;</b> 닫는 태그를 함께 적어주어야 컴퓨터가 인식할 수 있어요.",
+                msg: "<b>[실습 미션]</b> &lt;h1&gt; 태그를 활용해 화면에 'Hello Web'이라는 제목을 만들어보세요!",
+                req: ["<h1>", "Hello Web", "</h1>"]
+            },
+            {
+                title: "2강. 부제목과 본문 텍스트 작성하기",
+                lecture: "제목을 만들었으면 그 아래에 설명 글이나 본문을 적어볼 차례입니다. 중간 크기 제목은 <b>&lt;h2&gt;</b>를 쓰며, 일반적인 문단 글 텍스트는 <b>&lt;p&gt;</b>(Paragraph) 태그를 사용해서 작성합니다.",
+                msg: "<b>[실습 미션]</b> &lt;h2&gt; 태그로 '소개'라는 부제목을, &lt;p&gt; 태그로 본문 글을 각각 작성해 완성해보세요.",
+                req: ["<h2>", "</h2>", "<p>", "</p>"]
+            },
+            {
+                title: "3강. 사용자가 누를 수 있는 인터랙티브 버튼 만들기",
+                lecture: "웹페이지에 기능이나 이벤트를 넣고 싶을 때 가장 많이 쓰는 것이 바로 <b>&lt;button&gt;</b> 태그입니다. 버튼 태그 사이에 원하는 글자를 적으면 누를 수 있는 멋진 버튼 상자가 만들어집니다.",
+                msg: "<b>[실습 미션]</b> &lt;button&gt; 태그를 만들고, 버튼 안에 '시작하기'라는 글자를 넣어 구현해보세요.",
+                req: ["<button>", "시작하기", "</button>"]
+            },
+            {
+                title: "4강. 데이터를 입력받는 인풋(Input) 상자",
+                lecture: "회원가입 창이나 검색창을 만들 때 사용자의 입력을 받는 네모난 빈 칸이 필요하죠? 이 빈 칸을 만들어주는 태그가 바로 <b>&lt;input&gt;</b>입니다. 닫는 태그가 따로 없는 독특한 특징이 있어요.",
+                msg: "<b>[실습 미션]</b> 글자를 입력할 수 있는 &lt;input&gt; 태그를 화면에 배치해보세요.",
+                req: ["<input>"]
+            },
+            {
+                title: "5강. 다른 웹사이트로 이동하는 링크(a 태그) 연결하기",
+                lecture: "웹의 핵심은 바로 연결성입니다! 다른 페이지나 포털 사이트로 이동할 수 있는 링크를 만들려면 <b>&lt;a href=\"주소\"&gt;</b> 태그를 사용합니다. href 속성 안에 이동할 웹사이트 주소를 적어줍니다.",
+                msg: "<b>[실습 미션]</b> &lt;a href=&quot;...&quot;&gt; 태그를 활용해 링크를 만들어보세요.",
+                req: ["<a", "href="]
+            },
+            {
+                title: "6강. 웹페이지에 이미지(사진) 띄우기",
+                lecture: "글자만 있으면 지루하겠죠? 웹페이지에 사진이나 로고를 띄울 때는 <b>&lt;img src=\"사진주소\"&gt;</b> 태그를 사용합니다. src 속성은 사진 파일이 어디에 있는지 알려주는 내비게이션 역할을 합니다.",
+                msg: "<b>[실습 미션]</b> &lt;img src=&quot;...&quot;&gt; 태그를 작성해 사진 칸을 추가해보세요.",
+                req: ["<img", "src="]
+            },
+            {
+                title: "7강. 동아리 소개 목록을 점(Bullet)으로 정리하기",
+                lecture: "여러 가지 항목이나 동아리 활동 계획을 깔끔하게 나열할 때는 목록 태그를 씁니다. 순서가 없는 목록은 <b>&lt;ul&gt;</b>로 감싸고, 각 항목은 <b>&lt;li&gt;</b> 태그로 적어줍니다.",
+                msg: "<b>[실습 미션]</b> &lt;ul&gt;과 &lt;li&gt; 태그를 함께 써서 목록을 2개 이상 만들어보세요.",
+                req: ["<ul>", "<li>", "</li>", "</ul>"]
+            },
+            {
+                title: "8강. CSS 스타일 속성으로 글자 색상 꾸미기",
+                lecture: "HTML이 웹의 뼈대라면, 디자인과 색상을 입히는 것은 스타일(CSS)입니다. 태그 안에 <b>style=\"color: blue;\"</b> 같은 속성을 추가하면 글자 색상을 내 마음대로 바꿀 수 있습니다.",
+                msg: "<b>[실습 미션]</b> style 속성을 이용해 글자에 색상을 입히는 코드를 작성해보세요.",
+                req: ["style=", "color:"]
+            },
+            {
+                title: "9강. 상자의 배경색과 박스 스타일링",
+                lecture: "웹페이지 전체나 특정 영역의 분위기를 바꾸려면 배경색을 지정해야 합니다. <b>background-color</b> 속성을 사용하면 배경 색상을 화려하게 꾸밀 수 있습니다.",
+                msg: "<b>[실습 미션]</b> background-color 속성을 포함한 코드를 작성해보세요.",
+                req: ["background-color"]
+            },
+            {
+                title: "10강. 최종 프로젝트: 나만의 동아리 홈페이지 완성하기",
+                lecture: "축하합니다! 이제 여러분은 1강부터 배워온 모든 HTML 태그와 속성을 활용할 수 있습니다. 제목, 본문, 버튼, 이미지, 링크가 모두 들어간 완벽한 나만의 웹페이지 코드를 작성하고 스튜디오에 공유해 보세요!",
+                msg: "<b>[실습 미션]</b> 제목(&lt;h1&gt;)과 버튼(&lt;button&gt;)이 모두 포함된 나만의 웹페이지 코드를 완성해 제출하세요!",
+                req: ["<h1>", "<button>"]
+            }
         ];
+
         let currentStage = 1;
         let currentMission = {};
         let customStagesList = [];
@@ -213,12 +270,13 @@
         }
 
         async function saveCustomStage() {
+            let title = document.getElementById("custom-title").value.trim();
+            let lecture = document.getElementById("custom-lecture").value.trim();
             let msg = document.getElementById("custom-msg").value.trim();
             let reqsStr = document.getElementById("custom-reqs").value.trim();
-            let tip = document.getElementById("custom-tip").value.trim();
 
-            if (!msg || !reqsStr) {
-                alert("문제 설명과 필수 키워드를 입력해주세요!");
+            if (!title || !lecture || !msg || !reqsStr) {
+                alert("모든 칸을 빠짐없이 입력해주세요!");
                 return;
             }
 
@@ -226,13 +284,14 @@
 
             await fetch('/api/custom-stages', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ msg, reqs, tip })
+                body: JSON.stringify({ title, lecture, msg, reqs, tip: "직접 출제된 실습 문제입니다." })
             });
 
-            alert("새로운 스테이지가 성공적으로 등록되었습니다!");
+            alert("새로운 강의와 실습이 성공적으로 등록되었습니다!");
+            document.getElementById("custom-title").value = "";
+            document.getElementById("custom-lecture").value = "";
             document.getElementById("custom-msg").value = "";
             document.getElementById("custom-reqs").value = "";
-            document.getElementById("custom-tip").value = "";
             goHome();
         }
 
@@ -257,32 +316,43 @@
         }
 
         function loadTrainingStage() {
-            document.getElementById("stage-display").innerText = "STAGE " + currentStage;
+            document.getElementById("stage-display").innerText = "LECTURE " + currentStage;
             document.getElementById("code-input").value = "";
             document.getElementById("feedback").innerText = "";
 
-            if (currentStage <= baseTrainingData.length) {
-                currentMission = baseTrainingData[currentStage - 1];
+            if (currentStage <= baseLectures.length) {
+                let lec = baseLectures[currentStage - 1];
+                currentMission = {
+                    title: lec.title,
+                    lectureText: lec.lecture,
+                    msg: lec.msg,
+                    req: lec.req,
+                    tip: lec.tip || "개념 설명을 다시 읽고 실습 코드를 작성해 보세요!"
+                };
             } else {
-                let customIndex = currentStage - baseTrainingData.length - 1;
+                let customIndex = currentStage - baseLectures.length - 1;
                 if (customIndex < customStagesList.length) {
                     let cs = customStagesList[customIndex];
                     currentMission = {
-                        msg: `✏️ <span style='color:#00ffcc;'>[추가 출제 스테이지 ${currentStage}]</span><br>${cs.msg}`,
+                        title: cs.title || `추가 강의 ${currentStage}`,
+                        lectureText: cs.lecture,
+                        msg: cs.msg,
                         req: cs.reqs,
-                        tip: `💡 **출제자 힌트:** ${cs.tip || "등록된 힌트가 없습니다."}`
+                        tip: "추가 출제된 실습 문제입니다."
                     };
                 } else {
                     currentMission = {
-                        msg: `🎉 <span style='color:#00ffcc;'>모든 스테이지를 완벽하게 클리어했습니다!</span><br>메인 메뉴에서 문제를 직접 더 만들어보세요!`,
+                        title: "🎉 80분 정규 강의 완강!",
+                        lectureText: "모든 강의와 실습 과정을 훌륭하게 완수하셨습니다! 이제 동아리 코드 공유 스튜디오에서 친구들과 웹페이지를 자랑해 보세요.",
+                        msg: "<b>[완강 축하]</b> 모든 과정을 멋지게 수료했습니다!",
                         req: [],
-                        tip: "💡 최고입니다!"
+                        tip: "수고하셨습니다!"
                     };
                 }
             }
 
-            document.getElementById("npc-dialogue").innerHTML = currentMission.msg;
-            document.getElementById("tip-display").innerHTML = currentMission.tip;
+            document.getElementById("lec-title").innerText = currentMission.title;
+            document.getElementById("lec-body").innerHTML = currentMission.lectureText + "<br><br>" + currentMission.msg;
         }
 
         async function checkCode() {
@@ -295,7 +365,7 @@
             let fb = document.getElementById("feedback");
             if (pass) {
                 fb.style.color = "#00ffcc";
-                fb.innerText = "미션 성공! 서버에 기록 저장 중...";
+                fb.innerText = "실습 성공! 다음 강의로 진도가 저장됩니다...";
                 
                 if (currentUser) {
                     await fetch('/api/progress', {
@@ -307,7 +377,7 @@
                 setTimeout(() => { currentStage++; loadTrainingStage(); }, 1500);
             } else {
                 fb.style.color = "#ff0055";
-                fb.innerText = "앗, 코드를 다시 확인해보세요!";
+                fb.innerText = "앗, 강의 내용을 참고하여 실습 코드를 다시 작성해보세요!";
             }
         }
 
@@ -327,7 +397,7 @@
                 closeStageModal();
                 loadTrainingStage();
             } else {
-                alert("올바른 스테이지 번호를 입력하세요!");
+                alert("올바른 강의 번호를 입력하세요!");
             }
         }
 

@@ -76,8 +76,8 @@ app.get('/api/custom-stages', (req, res) => {
 });
 
 app.post('/api/custom-stages', (req, res) => {
-    const { msg, reqs, tip } = req.body;
-    customStages.push({ msg, reqs, tip });
+    const { title, lecture, msg, reqs, tip } = req.body;
+    customStages.push({ title, lecture, msg, reqs, tip });
     saveData(STAGES_FILE, customStages);
     res.json({ success: true });
 });
