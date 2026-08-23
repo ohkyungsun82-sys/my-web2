@@ -5,17 +5,39 @@ const path = require('path');
 let rooms = {};
 let users = [];
 
-const mapData = [
-    [1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,1,0,0,0,2,1],
-    [1,0,1,0,0,0,1,0,0,1],
-    [1,0,0,0,1,0,0,0,0,1],
-    [1,1,1,0,0,0,1,1,1,1],
-    [1,0,0,0,1,0,0,0,0,1],
-    [1,0,1,0,0,0,1,0,0,1],
-    [1,0,0,0,1,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1]
+const maps = [
+    [
+        [1,1,1,1,1,1,1,1],
+        [1,3,0,0,0,0,2,1],
+        [1,1,1,1,1,1,1,1]
+    ],
+    [
+        [1,1,1,1,1,1,1,1],
+        [1,3,0,0,1,0,2,1],
+        [1,1,1,0,0,0,1,1],
+        [1,1,1,1,1,1,1,1]
+    ],
+    [
+        [1,1,1,1,1,1,1,1],
+        [1,3,0,0,1,0,0,1],
+        [1,0,1,0,0,0,1,1],
+        [1,0,0,0,1,0,2,1],
+        [1,1,1,1,1,1,1,1]
+    ]
 ];
+
+function setupStage(room) {
+    const currentMap = maps[room.stage];
+    room.mapData = currentMap;
+    for (let y = 0; y < currentMap.length; y++) {
+        for (let x = 0; x < currentMap[y].length; x++) {
+            if (currentMap[y][x] === 3) {
+                room.pos = { x, y };
+            }
+        }
+    }
+    room.gameState = 'playing';
+}
 
 const server = http.createServer((req, res) => {
     let body = '';
@@ -53,37 +75,53 @@ const server = http.createServer((req, res) => {
                 const newId = Math.random().toString(36).substring(2, 7);
                 rooms[newId] = {
                     roomId: newId,
-                    password: password || '',
-                    maxPlayers: parseInt(maxPlayers) || 2,
+                    password: password || '없음',
+                    maxPlayers: parseInt(maxPlayers),
+                    stage: 0,
                     gameState: 'waiting',
-                    players: [],
+                    players: [{ username, nickname, keys: [] }],
                     assignedKeys: [],
-                    pos: { x: 1, y: 1 }
+                    pos: { x: 0, y: 0 },
+                    mapData: []
                 };
                 res.end(JSON.stringify({ type: 'roomCreated', roomId: newId }));
             } else if (type === 'joinRoom') {
                 const room = rooms[roomId];
                 if (!room) {
                     res.end(JSON.stringify({ type: 'error', message: '방이 없습니다.' }));
-                } else if (room.password !== password) {
+                } else if (room.password !== '없음' && room.password !== password) {
                     res.end(JSON.stringify({ type: 'error', message: '비밀번호가 틀립니다.' }));
                 } else if (room.players.length >= room.maxPlayers) {
                     res.end(JSON.stringify({ type: 'error', message: '방이 꽉 찼습니다.' }));
                 } else if (room.players.some(p => p.username === username)) {
-                    res.end(JSON.stringify({ type: 'error', message: '이미 입장해 있습니다.' }));
+                    res.end(JSON.stringify({ type: 'roomJoined', room }));
                 } else {
-                    room.players.push({ username, nickname, key: null });
+                    room.players.push({ username, nickname, keys: [] });
                     res.end(JSON.stringify({ type: 'roomJoined', room }));
                 }
+            } else if (type === 'leaveRoom') {
+                const room = rooms[roomId];
+                if (room) {
+                    room.players = room.players.filter(p => p.username !== username);
+                    if (room.players.length === 0) {
+                        delete rooms[roomId];
+                    } else {
+                        room.assignedKeys = [];
+                        room.players.forEach(p => p.keys = []);
+                        room.gameState = 'waiting';
+                    }
+                }
+                res.end(JSON.stringify({ type: 'success' }));
             } else if (type === 'selectKey') {
                 const room = rooms[roomId];
                 if (room) {
                     const player = room.players.find(p => p.username === username);
-                    if (player && !room.assignedKeys.includes(key)) {
-                        player.key = key;
+                    const limit = 4 / room.maxPlayers;
+                    if (player && !room.assignedKeys.includes(key) && player.keys.length < limit) {
+                        player.keys.push(key);
                         room.assignedKeys.push(key);
-                        if (room.players.length === room.maxPlayers && room.players.every(p => p.key !== null)) {
-                            room.gameState = 'playing';
+                        if (room.assignedKeys.length === 4) {
+                            setupStage(room);
                         }
                         res.end(JSON.stringify({ type: 'success' }));
                     } else {
@@ -94,7 +132,7 @@ const server = http.createServer((req, res) => {
                 const room = rooms[roomId];
                 if (room && room.gameState === 'playing') {
                     const player = room.players.find(p => p.username === username);
-                    if (player && player.key === key) {
+                    if (player && player.keys.includes(key)) {
                         let dx = 0, dy = 0;
                         if (key === 'W') dy = -1;
                         if (key === 'S') dy = 1;
@@ -104,11 +142,19 @@ const server = http.createServer((req, res) => {
                         while (true) {
                             let nx = room.pos.x + dx;
                             let ny = room.pos.y + dy;
-                            if (mapData[ny][nx] === 1) break;
+                            if (room.mapData[ny][nx] === 1) break;
                             room.pos.x = nx;
                             room.pos.y = ny;
-                            if (mapData[ny][nx] === 2) {
+                            if (room.mapData[ny][nx] === 2) {
                                 room.gameState = 'clear';
+                                setTimeout(() => {
+                                    room.stage++;
+                                    if (room.stage >= maps.length) {
+                                        room.gameState = 'allClear';
+                                    } else {
+                                        setupStage(room);
+                                    }
+                                }, 2000);
                                 break;
                             }
                         }
@@ -118,7 +164,7 @@ const server = http.createServer((req, res) => {
             } else if (type === 'poll') {
                 const room = rooms[roomId];
                 if (room) {
-                    res.end(JSON.stringify({ type: 'pollData', room, mapData }));
+                    res.end(JSON.stringify({ type: 'pollData', room }));
                 } else {
                     res.end(JSON.stringify({ type: 'error' }));
                 }

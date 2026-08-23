@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Ender Dash Multiplayer</title>
+    <title>Ender Dash</title>
     <style>
         body { text-align: center; background: #111; color: white; font-family: sans-serif; margin-top: 50px; }
         .screen { display: none; }
@@ -12,52 +12,69 @@
         .cell { width: 40px; height: 40px; box-sizing: border-box; }
         .wall { background: #555; border: 1px solid #333; }
         .floor { background: #add8e6; border: 1px solid #99c2d1; }
+        .start { background: #ffeb3b; }
         .goal { background: #00ff00; }
         #player { width: 36px; height: 36px; background: #8a2be2; position: absolute; margin: 2px; transition: 0.15s linear; border-radius: 50%; z-index: 10; }
         .key-btn { font-size: 20px; padding: 10px 20px; margin: 5px; cursor: pointer; }
-        input, select { padding: 8px; margin: 5px; }
+        input, select, button { padding: 8px; margin: 5px; font-size: 16px; }
     </style>
 </head>
 <body>
-    <div id="authScreen" class="screen active">
-        <h1>로그인 및 회원가입</h1>
-        <input id="authId" placeholder="아이디"><br>
-        <input id="authPw" type="password" placeholder="비밀번호"><br>
-        <input id="authNick" placeholder="닉네임 (회원가입시)"><br><br>
+    <div id="loginScreen" class="screen active">
+        <h1>로그인</h1>
+        <input id="loginId" placeholder="아이디"><br>
+        <input id="loginPw" type="password" placeholder="비밀번호"><br><br>
         <button onclick="login()">로그인</button>
-        <button onclick="register()">회원가입</button>
+        <button onclick="showScreen('registerScreen')">회원가입 가기</button>
+    </div>
+
+    <div id="registerScreen" class="screen">
+        <h1>회원가입</h1>
+        <input id="regId" placeholder="아이디"><br>
+        <input id="regPw" type="password" placeholder="비밀번호"><br>
+        <input id="regNick" placeholder="닉네임"><br><br>
+        <button onclick="register()">가입하기</button>
+        <button onclick="showScreen('loginScreen')">뒤로</button>
     </div>
 
     <div id="lobby" class="screen">
         <h1 id="welcomeMsg"></h1>
         <button onclick="logout()">로그아웃</button>
         <hr style="width:50%; margin:20px auto;">
-        <input id="roomPw" type="password" placeholder="방 비밀번호"><br>
+        <h3>방 만들기</h3>
+        <input id="roomPw" type="password" placeholder="비밀번호 (선택)"><br>
         <select id="maxPlayers">
+            <option value="1">1인용 (혼자하기)</option>
             <option value="2">2인용</option>
             <option value="4">4인용</option>
         </select><br>
         <button onclick="createRoom()">방 만들기</button>
         <hr style="width:50%; margin:20px auto;">
+        <h3>방 참가하기</h3>
         <input id="joinRoomId" placeholder="방 코드"><br>
-        <input id="joinRoomPw" type="password" placeholder="방 비밀번호"><br>
-        <button onclick="joinRoom()">참가하기</button>
+        <input id="joinRoomPw" type="password" placeholder="비밀번호"><br>
+        <button onclick="joinRoom()">참가</button>
     </div>
 
     <div id="room" class="screen">
         <h2 id="roomTitle">대기실</h2>
-        <div id="playerList"></div>
-        <div id="keySelector" style="margin-top:20px;">
+        <h3 id="roomPwDisplay" style="color: #ffeb3b;"></h3>
+        <button onclick="leaveRoom()" style="background: red; color: white;">방 나가기</button>
+        <div id="playerList" style="margin: 20px 0;"></div>
+        <div id="keySelector">
+            <p id="keyGuide"></p>
             <button class="key-btn" id="btnW" onclick="selectKey('W')">W</button>
             <button class="key-btn" id="btnA" onclick="selectKey('A')">A</button>
             <button class="key-btn" id="btnS" onclick="selectKey('S')">S</button>
             <button class="key-btn" id="btnD" onclick="selectKey('D')">D</button>
         </div>
-        <div id="myKeyDisplay" style="margin:20px; font-size:20px; color:#ffeb3b;"></div>
+        <div id="myKeyDisplay" style="margin:10px; font-size:20px; color:#0f0;"></div>
+        <h2 id="stageDisplay" style="display:none;"></h2>
         <div id="gameContainer">
             <div id="gameArea"></div>
             <div id="player"></div>
             <h3 id="clearMsg" style="color:#0f0; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:40px; text-shadow:2px 2px 0 #000; z-index:20;">클리어!</h3>
+            <h3 id="allClearMsg" style="color:#ffeb3b; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:40px; text-shadow:2px 2px 0 #000; z-index:20;">모든 스테이지 완료!</h3>
         </div>
     </div>
 
@@ -65,7 +82,16 @@
         let currentUser = null;
         let currentRoomId = null;
         let pollInterval = null;
-        let mapDrawn = false;
+        let currentStage = -1;
+
+        window.onload = () => {
+            const saved = localStorage.getItem('gameUser');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
+                showScreen('lobby');
+            }
+        };
 
         async function sendRequest(data) {
             const res = await fetch('/api', {
@@ -76,46 +102,53 @@
             return await res.json();
         }
 
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
         async function register() {
             const res = await sendRequest({
                 type: 'register',
-                username: document.getElementById('authId').value,
-                password: document.getElementById('authPw').value,
-                nickname: document.getElementById('authNick').value
+                username: document.getElementById('regId').value,
+                password: document.getElementById('regPw').value,
+                nickname: document.getElementById('regNick').value
             });
             alert(res.message);
+            if(res.type === 'success') showScreen('loginScreen');
         }
 
         async function login() {
             const res = await sendRequest({
                 type: 'login',
-                username: document.getElementById('authId').value,
-                password: document.getElementById('authPw').value
+                username: document.getElementById('loginId').value,
+                password: document.getElementById('loginPw').value
             });
             if (res.type === 'loginSuccess') {
                 currentUser = res.user;
-                showScreen('lobby');
+                localStorage.setItem('gameUser', JSON.stringify(currentUser));
                 document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
+                showScreen('lobby');
             } else {
                 alert(res.message);
             }
         }
 
         function logout() {
+            localStorage.removeItem('gameUser');
             currentUser = null;
-            clearInterval(pollInterval);
-            showScreen('authScreen');
+            showScreen('loginScreen');
         }
 
         async function createRoom() {
             const res = await sendRequest({
                 type: 'createRoom',
+                username: currentUser.username,
+                nickname: currentUser.nickname,
                 password: document.getElementById('roomPw').value,
                 maxPlayers: document.getElementById('maxPlayers').value
             });
-            if (res.type === 'roomCreated') {
-                enterRoom(res.roomId);
-            }
+            if (res.type === 'roomCreated') enterRoom(res.roomId);
         }
 
         async function joinRoom() {
@@ -126,18 +159,23 @@
                 username: currentUser.username,
                 nickname: currentUser.nickname
             });
-            if (res.type === 'roomJoined') {
-                enterRoom(res.room.roomId);
-            } else {
-                alert(res.message);
-            }
+            if (res.type === 'roomJoined') enterRoom(res.room.roomId);
+            else alert(res.message);
         }
 
         function enterRoom(roomId) {
             currentRoomId = roomId;
+            currentStage = -1;
             showScreen('room');
-            mapDrawn = false;
             pollInterval = setInterval(pollRoom, 150);
+        }
+
+        async function leaveRoom() {
+            await sendRequest({ type: 'leaveRoom', roomId: currentRoomId, username: currentUser.username });
+            clearInterval(pollInterval);
+            currentRoomId = null;
+            document.getElementById('gameContainer').style.display = 'none';
+            showScreen('lobby');
         }
 
         async function selectKey(k) {
@@ -155,18 +193,25 @@
 
         async function pollRoom() {
             const res = await sendRequest({ type: 'poll', roomId: currentRoomId });
-            if (res.type === 'pollData') {
-                updateUI(res.room, res.mapData);
-            }
+            if (res.type === 'pollData') updateUI(res.room);
+            if (res.type === 'error') leaveRoom();
         }
 
-        function updateUI(room, mapData) {
+        function updateUI(room) {
             document.getElementById('roomTitle').innerHTML = `방 코드: <b>${room.roomId}</b> (${room.players.length}/${room.maxPlayers})`;
-            document.getElementById('playerList').innerHTML = room.players.map(p => `- ${p.nickname} (키: ${p.key || '선택 중'})`).join('<br>');
+            document.getElementById('roomPwDisplay').innerText = `비밀번호: ${room.password}`;
+            document.getElementById('playerList').innerHTML = room.players.map(p => `- ${p.nickname} (키: ${p.keys.length > 0 ? p.keys.join(',') : '고르는 중'})`).join('<br>');
             
             const myPlayer = room.players.find(p => p.username === currentUser.username);
-            if (myPlayer && myPlayer.key) {
-                document.getElementById('myKeyDisplay').innerText = `내 담당 키: ${myPlayer.key}`;
+            const keyLimit = 4 / room.maxPlayers;
+            
+            document.getElementById('keyGuide').innerText = `1인당 ${keyLimit}개의 키를 고르세요.`;
+            
+            if (myPlayer && myPlayer.keys.length > 0) {
+                document.getElementById('myKeyDisplay').innerText = `내 키: ${myPlayer.keys.join(', ')}`;
+            }
+
+            if (myPlayer && myPlayer.keys.length >= keyLimit) {
                 document.getElementById('keySelector').style.display = 'none';
             } else {
                 document.getElementById('keySelector').style.display = 'block';
@@ -175,36 +220,39 @@
                 });
             }
 
-            if (room.gameState === 'playing' || room.gameState === 'clear') {
+            if (room.gameState === 'playing' || room.gameState === 'clear' || room.gameState === 'allClear') {
                 document.getElementById('gameContainer').style.display = 'block';
+                document.getElementById('stageDisplay').style.display = 'block';
+                document.getElementById('stageDisplay').innerText = `스테이지 ${room.stage + 1}`;
                 
-                if (!mapDrawn) {
+                if (currentStage !== room.stage && room.mapData.length > 0) {
                     const ga = document.getElementById('gameArea');
-                    ga.style.gridTemplateColumns = `repeat(${mapData[0].length}, 40px)`;
+                    ga.style.gridTemplateColumns = `repeat(${room.mapData[0].length}, 40px)`;
                     ga.innerHTML = '';
-                    for (let y = 0; y < mapData.length; y++) {
-                        for (let x = 0; x < mapData[y].length; x++) {
+                    for (let y = 0; y < room.mapData.length; y++) {
+                        for (let x = 0; x < room.mapData[y].length; x++) {
                             const d = document.createElement('div');
-                            d.className = 'cell ' + (mapData[y][x] === 1 ? 'wall' : mapData[y][x] === 2 ? 'goal' : 'floor');
+                            let type = 'floor';
+                            if(room.mapData[y][x]===1) type = 'wall';
+                            if(room.mapData[y][x]===2) type = 'goal';
+                            if(room.mapData[y][x]===3) type = 'start';
+                            d.className = 'cell ' + type;
                             ga.appendChild(d);
                         }
                     }
-                    mapDrawn = true;
+                    currentStage = room.stage;
                 }
 
                 const p = document.getElementById('player');
                 p.style.left = (room.pos.x * 40) + 'px';
                 p.style.top = (room.pos.y * 40) + 'px';
 
-                if (room.gameState === 'clear') {
-                    document.getElementById('clearMsg').style.display = 'block';
-                }
+                document.getElementById('clearMsg').style.display = room.gameState === 'clear' ? 'block' : 'none';
+                document.getElementById('allClearMsg').style.display = room.gameState === 'allClear' ? 'block' : 'none';
+            } else {
+                document.getElementById('gameContainer').style.display = 'none';
+                document.getElementById('stageDisplay').style.display = 'none';
             }
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
         }
     </script>
 </body>
