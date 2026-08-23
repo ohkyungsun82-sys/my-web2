@@ -4,26 +4,20 @@ const path = require('path');
 
 let rooms = {};
 let users = [];
-let bannedUsers = {}; // 밴 목록 { username: 밴 해제 시간(timestamp) }
+let bannedUsers = {};
 
-// 맵 수정: 막혀서 못 깨는 부분 해결
 const maps = [
-    // Stage 1 (9x3)
     [
         [1,1,1,1,1,1,1,1,1],
         [1,3,0,0,0,0,0,2,1],
         [1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 2 (9x4)
     [
         [1,1,1,1,1,1,1,1,1],
         [1,3,0,0,1,0,0,2,1],
         [1,1,1,0,0,0,1,1,1],
         [1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 3 (수정됨 10x5)
     [
         [1,1,1,1,1,1,1,1,1,1],
         [1,3,0,0,1,0,0,0,0,1],
@@ -31,8 +25,6 @@ const maps = [
         [1,0,0,0,0,0,1,2,0,1],
         [1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 4 (11x6)
     [
         [1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,0,0,1,0,0,0,2,1],
@@ -41,8 +33,6 @@ const maps = [
         [1,0,1,1,1,1,1,0,0,0,1],
         [1,1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 5 (12x7)
     [
         [1,1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,1,0,0,0,1,0,0,2,1],
@@ -52,8 +42,6 @@ const maps = [
         [1,1,1,1,0,0,0,0,0,0,0,1],
         [1,1,1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 6 (13x8)
     [
         [1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,0,1,0,0,0,1,0,0,2,1],
@@ -64,8 +52,6 @@ const maps = [
         [1,0,0,0,1,1,1,0,0,0,1,1,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 7 (14x9)
     [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,0,0,1,0,0,0,0,1,0,2,1],
@@ -77,8 +63,6 @@ const maps = [
         [1,0,0,0,0,0,0,1,0,0,0,1,0,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 8 (15x10)
     [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,1,0,0,0,0,1,0,0,0,0,2,1],
@@ -91,8 +75,6 @@ const maps = [
         [1,0,0,0,1,0,0,0,1,0,0,0,1,1,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 9 (16x11)
     [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,0,1,0,0,0,1,0,0,0,1,0,2,1],
@@ -106,8 +88,6 @@ const maps = [
         [1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ],
-
-    // Stage 10 (18x12)
     [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,3,0,0,1,0,0,0,1,0,0,0,1,0,0,0,2,1],
@@ -153,9 +133,8 @@ const server = http.createServer((req, res) => {
         }
 
         if (req.method === 'POST' && req.url === '/api') {
-            const { type, username, password, nickname, roomId, maxPlayers, key, message, targetUsername } = data;
+            const { type, username, password, nickname, roomId, maxPlayers, key, message, targetUsername, isPublic } = data;
 
-            // 밴 체크
             if (username && bannedUsers[username]) {
                 if (Date.now() < bannedUsers[username]) {
                     return res.end(JSON.stringify({ type: 'error', message: '이용이 정지된 계정입니다.' }));
@@ -185,6 +164,7 @@ const server = http.createServer((req, res) => {
                 rooms[newId] = {
                     roomId: newId,
                     password: isSingle ? '없음' : (password || '없음'),
+                    isPublic: isPublic === true, // 공개 방 여부
                     maxPlayers: parseInt(maxPlayers),
                     stage: 0,
                     gameState: 'waiting',
@@ -192,9 +172,15 @@ const server = http.createServer((req, res) => {
                     assignedKeys: [],
                     pos: { x: 0, y: 0 },
                     mapData: [],
-                    chat: [] // 채팅 기록
+                    chat: []
                 };
                 res.end(JSON.stringify({ type: 'roomCreated', roomId: newId }));
+            } else if (type === 'getRoomList') {
+                // 공개 방 목록 전송 (대기 중이고 빈자리가 있는 방만)
+                const publicRooms = Object.values(rooms)
+                    .filter(r => r.isPublic && r.gameState === 'waiting' && r.players.length < r.maxPlayers)
+                    .map(r => ({ roomId: r.roomId, maxPlayers: r.maxPlayers, currentPlayers: r.players.length, host: r.players[0].nickname }));
+                res.end(JSON.stringify({ type: 'roomList', list: publicRooms }));
             } else if (type === 'joinRoom') {
                 const room = rooms[roomId];
                 if (!room) {
@@ -279,9 +265,8 @@ const server = http.createServer((req, res) => {
                 }
                 res.end(JSON.stringify({ type: 'success' }));
             } else if (type === 'kick') {
-                // 이윤호(admin) 전용 기능
                 const room = rooms[roomId];
-                if (room && nickname === '이윤호') {
+                if (room && (username === '이윤호' || nickname === '이윤호')) {
                     room.players = room.players.filter(p => p.username !== targetUsername);
                 }
                 res.end(JSON.stringify({ type: 'success' }));
@@ -290,7 +275,7 @@ const server = http.createServer((req, res) => {
                 if (room) {
                     const playerExists = room.players.some(p => p.username === username);
                     if (!playerExists) {
-                        res.end(JSON.stringify({ type: 'kicked' })); // 킥 당했을 때
+                        res.end(JSON.stringify({ type: 'kicked' })); 
                     } else {
                         res.end(JSON.stringify({ type: 'pollData', room }));
                     }

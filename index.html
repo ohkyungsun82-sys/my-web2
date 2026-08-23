@@ -20,6 +20,10 @@
         .stepper-btn { background: #60a5fa; color: #fff; width: 45px; height: 45px; padding: 0; display: flex; justify-content: center; align-items: center; text-shadow: 1px 1px 0 #000; }
         hr { border: 2px solid #000; border-radius: 2px; margin: 20px auto; width: 80%; }
         
+        #publicRoomList { border: 3px solid #000; border-radius: 10px; max-height: 150px; overflow-y: auto; padding: 10px; background: #f3f4f6; text-align: left; margin: 10px auto; width: 90%; }
+        .room-item { background: #fff; border: 2px solid #000; border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .join-btn { padding: 5px 10px; font-size: 12px; margin: 0; background: #fbbf24; color: #000; text-shadow: none; }
+        
         #gameArea { display: grid; background: #222; border: 5px solid #000; border-radius: 10px; margin: 15px auto; width: max-content; overflow: hidden; }
         .cell { width: 45px; height: 45px; box-sizing: border-box; }
         .wall { background: #555; border: 1px solid #333; }
@@ -61,25 +65,38 @@
         </div>
     </div>
 
-    <div id="lobby" class="screen">
+    <div id="lobby" class="screen" style="width: 500px;">
         <div class="header">GAME SETTINGS</div>
         <div class="content">
             <h2 id="welcomeMsg"></h2>
             <button class="btn-red" style="padding: 8px 16px; font-size: 14px;" onclick="logout()">로그아웃</button>
             <hr>
-            <h3>MAX PLAYERS</h3>
+            <h3>방 만들기</h3>
             <div class="settings-row">
                 <button class="stepper-btn" onclick="changePlayers(-1)">-</button>
-                <span id="maxPlayersLabel">2</span>
+                <span id="maxPlayersLabel">2</span>인용
                 <button class="stepper-btn" onclick="changePlayers(1)">+</button>
             </div>
-            <input id="roomPw" type="password" placeholder="비밀번호 (선택)">
+            <div style="margin:10px;">
+                <label style="font-size: 18px; cursor:pointer;">
+                    <input type="checkbox" id="isPublic" checked style="width:auto; transform:scale(1.5); margin-right:10px;"> 
+                    공개 방으로 만들기 (비번 없음)
+                </label>
+            </div>
+            <input id="roomPw" type="password" placeholder="비밀번호 (비공개시)" style="display:none;">
             <button class="btn-green" style="width: 85%;" onclick="createRoom()">방 만들기</button>
+            
             <hr>
-            <h3>JOIN ROOM</h3>
+            <h3>공개 방 리스트 <button onclick="fetchRoomList()" style="padding:5px 10px; font-size:12px; background:#e5e7eb;">새로고침</button></h3>
+            <div id="publicRoomList">
+                방이 없습니다.
+            </div>
+
+            <hr>
+            <h3>비공개 방 참가</h3>
             <input id="joinRoomId" placeholder="방 코드">
             <input id="joinRoomPw" type="password" placeholder="비밀번호">
-            <button class="btn-blue" style="width: 85%;" onclick="joinRoom()">참가하기</button>
+            <button class="btn-blue" style="width: 85%;" onclick="joinRoomByInput()">코드 참가</button>
         </div>
     </div>
 
@@ -125,6 +142,7 @@
         let currentUser = null;
         let currentRoomId = null;
         let pollInterval = null;
+        let listInterval = null;
         let currentStage = -1;
         
         let allowedPlayers = [1, 2, 4];
@@ -135,8 +153,15 @@
             if (saved) {
                 currentUser = JSON.parse(saved);
                 document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님!`;
-                showScreen('lobby');
+                showLobby();
             }
+            
+            // 공개방 체크박스 연동
+            document.getElementById('isPublic').addEventListener('change', (e) => {
+                if (allowedPlayers[pIndex] !== 1) {
+                    document.getElementById('roomPw').style.display = e.target.checked ? 'none' : 'inline-block';
+                }
+            });
         };
 
         async function sendRequest(data) {
@@ -153,6 +178,13 @@
             document.getElementById(id).classList.add('active');
         }
 
+        function showLobby() {
+            showScreen('lobby');
+            fetchRoomList();
+            clearInterval(listInterval);
+            listInterval = setInterval(fetchRoomList, 3000); // 3초마다 방 목록 갱신
+        }
+
         function changePlayers(dir) {
             pIndex += dir;
             if (pIndex < 0) pIndex = 0;
@@ -160,10 +192,12 @@
             document.getElementById('maxPlayersLabel').innerText = allowedPlayers[pIndex];
             
             if (allowedPlayers[pIndex] === 1) {
+                document.getElementById('isPublic').checked = false;
+                document.getElementById('isPublic').parentElement.style.display = 'none';
                 document.getElementById('roomPw').style.display = 'none';
-                document.getElementById('roomPw').value = '';
             } else {
-                document.getElementById('roomPw').style.display = 'inline-block';
+                document.getElementById('isPublic').parentElement.style.display = 'block';
+                document.getElementById('roomPw').style.display = document.getElementById('isPublic').checked ? 'none' : 'inline-block';
             }
         }
 
@@ -178,7 +212,7 @@
                 currentUser = res.user;
                 localStorage.setItem('gameUser', JSON.stringify(currentUser));
                 document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님!`;
-                showScreen('lobby');
+                showLobby();
             } else {
                 alert(res.message);
             }
@@ -194,7 +228,7 @@
                 currentUser = res.user;
                 localStorage.setItem('gameUser', JSON.stringify(currentUser));
                 document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님!`;
-                showScreen('lobby');
+                showLobby();
             } else {
                 alert(res.message);
             }
@@ -203,25 +237,56 @@
         function logout() {
             localStorage.removeItem('gameUser');
             currentUser = null;
+            clearInterval(listInterval);
             showScreen('loginScreen');
         }
 
+        // 방 목록 불러오기
+        async function fetchRoomList() {
+            if (document.getElementById('lobby').classList.contains('active')) {
+                const res = await sendRequest({ type: 'getRoomList' });
+                if (res.type === 'roomList') {
+                    const listDiv = document.getElementById('publicRoomList');
+                    if (res.list.length === 0) {
+                        listDiv.innerHTML = '<div style="text-align:center; padding:10px;">방이 없습니다.</div>';
+                    } else {
+                        listDiv.innerHTML = res.list.map(r => `
+                            <div class="room-item">
+                                <div><b>${r.host}</b>의 방 (${r.currentPlayers}/${r.maxPlayers})</div>
+                                <button class="join-btn" onclick="joinRoomDirect('${r.roomId}')">참가</button>
+                            </div>
+                        `).join('');
+                    }
+                }
+            }
+        }
+
         async function createRoom() {
+            const isPublic = document.getElementById('isPublic').checked;
             const res = await sendRequest({
                 type: 'createRoom',
                 username: currentUser.username,
                 nickname: currentUser.nickname,
-                password: document.getElementById('roomPw').value,
+                password: isPublic ? '' : document.getElementById('roomPw').value,
+                isPublic: isPublic,
                 maxPlayers: allowedPlayers[pIndex]
             });
             if (res.type === 'roomCreated') enterRoom(res.roomId);
         }
 
-        async function joinRoom() {
+        async function joinRoomByInput() {
+            joinRoomLogic(document.getElementById('joinRoomId').value, document.getElementById('joinRoomPw').value);
+        }
+
+        async function joinRoomDirect(roomId) {
+            joinRoomLogic(roomId, ''); // 공개방은 비번 없음
+        }
+
+        async function joinRoomLogic(roomId, password) {
             const res = await sendRequest({
                 type: 'joinRoom',
-                roomId: document.getElementById('joinRoomId').value,
-                password: document.getElementById('joinRoomPw').value,
+                roomId: roomId,
+                password: password || '없음',
                 username: currentUser.username,
                 nickname: currentUser.nickname
             });
@@ -232,6 +297,7 @@
         function enterRoom(roomId) {
             currentRoomId = roomId;
             currentStage = -1;
+            clearInterval(listInterval); // 로비 새로고침 중지
             document.getElementById('chatArea').style.display = 'block';
             document.getElementById('chatInputContainer').style.display = 'block';
             showScreen('room');
@@ -245,7 +311,7 @@
             document.getElementById('gameContainer').style.display = 'none';
             document.getElementById('chatArea').style.display = 'none';
             document.getElementById('chatInputContainer').style.display = 'none';
-            showScreen('lobby');
+            showLobby();
         }
 
         async function selectKey(k) {
@@ -276,7 +342,7 @@
         }
 
         async function kickPlayer(targetUsername) {
-            await sendRequest({ type: 'kick', roomId: currentRoomId, nickname: currentUser.nickname, targetUsername });
+            await sendRequest({ type: 'kick', roomId: currentRoomId, username: currentUser.username, nickname: currentUser.nickname, targetUsername });
         }
 
         async function pollRoom() {
@@ -293,9 +359,8 @@
 
         function updateUI(room) {
             document.getElementById('roomTitle').innerText = `CODE : ${room.roomId} (${room.players.length}/${room.maxPlayers})`;
-            document.getElementById('roomPwDisplay').innerText = room.password !== '없음' ? `비밀번호: ${room.password}` : '비밀번호 없음';
+            document.getElementById('roomPwDisplay').innerText = room.password !== '없음' ? `비밀번호: ${room.password}` : '비밀번호 없음 (공개)';
             
-            // 수정됨: 아이디나 닉네임이 '이윤호'면 관리자 권한 부여
             const isAdmin = currentUser.username === '이윤호' || currentUser.nickname === '이윤호';
             
             document.getElementById('playerList').innerHTML = room.players.map(p => {
