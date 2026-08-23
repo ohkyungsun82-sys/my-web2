@@ -61,21 +61,23 @@ const server = http.createServer((req, res) => {
                 if (users.find(u => u.username === username)) {
                     res.end(JSON.stringify({ type: 'error', message: '이미 존재하는 아이디입니다.' }));
                 } else {
-                    users.push({ username, password, nickname });
-                    res.end(JSON.stringify({ type: 'success', message: '회원가입 성공!' }));
+                    const newUser = { username, password, nickname };
+                    users.push(newUser);
+                    res.end(JSON.stringify({ type: 'success', user: { username, nickname } }));
                 }
             } else if (type === 'login') {
                 const user = users.find(u => u.username === username && u.password === password);
                 if (user) {
-                    res.end(JSON.stringify({ type: 'loginSuccess', user }));
+                    res.end(JSON.stringify({ type: 'loginSuccess', user: { username: user.username, nickname: user.nickname } }));
                 } else {
                     res.end(JSON.stringify({ type: 'error', message: '로그인 실패' }));
                 }
             } else if (type === 'createRoom') {
                 const newId = Math.random().toString(36).substring(2, 7);
+                const isSingle = parseInt(maxPlayers) === 1;
                 rooms[newId] = {
                     roomId: newId,
-                    password: password || '없음',
+                    password: isSingle ? '없음' : (password || '없음'),
                     maxPlayers: parseInt(maxPlayers),
                     stage: 0,
                     gameState: 'waiting',

@@ -4,77 +4,104 @@
     <meta charset="UTF-8">
     <title>Ender Dash</title>
     <style>
-        body { text-align: center; background: #111; color: white; font-family: sans-serif; margin-top: 50px; }
-        .screen { display: none; }
+        body { font-family: 'Arial Black', sans-serif; background: #60a5fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .screen { display: none; background: #fff; border: 5px solid #000; border-radius: 20px; width: 420px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); overflow: hidden; text-align: center; }
         .active { display: block; }
-        #gameContainer { display: none; position: relative; width: max-content; margin: 20px auto; border: 4px solid #444; }
-        #gameArea { display: grid; background: #222; }
-        .cell { width: 40px; height: 40px; box-sizing: border-box; }
+        .header { background: #93c5fd; border-bottom: 5px solid #000; padding: 15px; color: #fff; font-size: 26px; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
+        .content { padding: 25px; }
+        h1, h2, h3 { margin: 10px 0; color: #333; }
+        input { width: 85%; padding: 12px; margin: 8px 0; border: 4px solid #000; border-radius: 12px; font-size: 16px; font-weight: bold; outline: none; }
+        button { background: #fff; border: 4px solid #000; border-radius: 12px; padding: 12px 24px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 #000; margin: 8px; transition: 0.1s; }
+        button:active { transform: translateY(5px); box-shadow: 0 0 0 #000; }
+        .btn-green { background: #4ade80; color: #fff; text-shadow: 1px 1px 0 #000; }
+        .btn-blue { background: #60a5fa; color: #fff; text-shadow: 1px 1px 0 #000; }
+        .btn-red { background: #f87171; color: #fff; text-shadow: 1px 1px 0 #000; }
+        .settings-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 15px 0; font-size: 22px; }
+        .stepper-btn { background: #60a5fa; color: #fff; width: 45px; height: 45px; padding: 0; display: flex; justify-content: center; align-items: center; text-shadow: 1px 1px 0 #000; }
+        hr { border: 2px solid #000; border-radius: 2px; margin: 20px auto; width: 80%; }
+        #gameArea { display: grid; background: #222; border: 5px solid #000; border-radius: 10px; margin: 15px auto; width: max-content; overflow: hidden; }
+        .cell { width: 45px; height: 45px; box-sizing: border-box; }
         .wall { background: #555; border: 1px solid #333; }
         .floor { background: #add8e6; border: 1px solid #99c2d1; }
-        .start { background: #ffeb3b; }
-        .goal { background: #00ff00; }
-        #player { width: 36px; height: 36px; background: #8a2be2; position: absolute; margin: 2px; transition: 0.15s linear; border-radius: 50%; z-index: 10; }
-        .key-btn { font-size: 20px; padding: 10px 20px; margin: 5px; cursor: pointer; }
-        input, select, button { padding: 8px; margin: 5px; font-size: 16px; }
+        .start { background: #facc15; border: 1px solid #ca8a04; }
+        .goal { background: #4ade80; border: 1px solid #166534; }
+        #player { width: 35px; height: 35px; background: #a855f7; position: absolute; margin: 5px; transition: 0.15s linear; border-radius: 50%; z-index: 10; border: 3px solid #000; box-sizing: border-box; }
+        #gameContainer { display: none; position: relative; margin: 20px auto; }
+        .key-btn { font-size: 24px; padding: 15px; width: 60px; height: 60px; }
+        .overlay-msg { color:#4ade80; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:45px; text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; z-index:20; white-space: nowrap; }
     </style>
 </head>
 <body>
     <div id="loginScreen" class="screen active">
-        <h1>로그인</h1>
-        <input id="loginId" placeholder="아이디"><br>
-        <input id="loginPw" type="password" placeholder="비밀번호"><br><br>
-        <button onclick="login()">로그인</button>
-        <button onclick="showScreen('registerScreen')">회원가입 가기</button>
+        <div class="header">LOGIN</div>
+        <div class="content">
+            <input id="loginId" placeholder="아이디">
+            <input id="loginPw" type="password" placeholder="비밀번호">
+            <br>
+            <button class="btn-green" onclick="login()">로그인</button>
+            <button class="btn-blue" onclick="showScreen('registerScreen')">회원가입</button>
+        </div>
     </div>
 
     <div id="registerScreen" class="screen">
-        <h1>회원가입</h1>
-        <input id="regId" placeholder="아이디"><br>
-        <input id="regPw" type="password" placeholder="비밀번호"><br>
-        <input id="regNick" placeholder="닉네임"><br><br>
-        <button onclick="register()">가입하기</button>
-        <button onclick="showScreen('loginScreen')">뒤로</button>
+        <div class="header">REGISTER</div>
+        <div class="content">
+            <input id="regId" placeholder="아이디">
+            <input id="regPw" type="password" placeholder="비밀번호">
+            <input id="regNick" placeholder="닉네임">
+            <br>
+            <button class="btn-green" onclick="register()">가입하기</button>
+            <button class="btn-red" onclick="showScreen('loginScreen')">취소</button>
+        </div>
     </div>
 
     <div id="lobby" class="screen">
-        <h1 id="welcomeMsg"></h1>
-        <button onclick="logout()">로그아웃</button>
-        <hr style="width:50%; margin:20px auto;">
-        <h3>방 만들기</h3>
-        <input id="roomPw" type="password" placeholder="비밀번호 (선택)"><br>
-        <select id="maxPlayers">
-            <option value="1">1인용 (혼자하기)</option>
-            <option value="2">2인용</option>
-            <option value="4">4인용</option>
-        </select><br>
-        <button onclick="createRoom()">방 만들기</button>
-        <hr style="width:50%; margin:20px auto;">
-        <h3>방 참가하기</h3>
-        <input id="joinRoomId" placeholder="방 코드"><br>
-        <input id="joinRoomPw" type="password" placeholder="비밀번호"><br>
-        <button onclick="joinRoom()">참가</button>
+        <div class="header">GAME SETTINGS</div>
+        <div class="content">
+            <h2 id="welcomeMsg"></h2>
+            <button class="btn-red" style="padding: 8px 16px; font-size: 14px;" onclick="logout()">로그아웃</button>
+            <hr>
+            <h3>MAX PLAYERS</h3>
+            <div class="settings-row">
+                <button class="stepper-btn" onclick="changePlayers(-1)">-</button>
+                <span id="maxPlayersLabel">2</span>
+                <button class="stepper-btn" onclick="changePlayers(1)">+</button>
+            </div>
+            <input id="roomPw" type="password" placeholder="비밀번호 (선택)">
+            <button class="btn-green" style="width: 85%;" onclick="createRoom()">방 만들기</button>
+            <hr>
+            <h3>JOIN ROOM</h3>
+            <input id="joinRoomId" placeholder="방 코드">
+            <input id="joinRoomPw" type="password" placeholder="비밀번호">
+            <button class="btn-blue" style="width: 85%;" onclick="joinRoom()">참가하기</button>
+        </div>
     </div>
 
-    <div id="room" class="screen">
-        <h2 id="roomTitle">대기실</h2>
-        <h3 id="roomPwDisplay" style="color: #ffeb3b;"></h3>
-        <button onclick="leaveRoom()" style="background: red; color: white;">방 나가기</button>
-        <div id="playerList" style="margin: 20px 0;"></div>
-        <div id="keySelector">
-            <p id="keyGuide"></p>
-            <button class="key-btn" id="btnW" onclick="selectKey('W')">W</button>
-            <button class="key-btn" id="btnA" onclick="selectKey('A')">A</button>
-            <button class="key-btn" id="btnS" onclick="selectKey('S')">S</button>
-            <button class="key-btn" id="btnD" onclick="selectKey('D')">D</button>
-        </div>
-        <div id="myKeyDisplay" style="margin:10px; font-size:20px; color:#0f0;"></div>
-        <h2 id="stageDisplay" style="display:none;"></h2>
-        <div id="gameContainer">
-            <div id="gameArea"></div>
-            <div id="player"></div>
-            <h3 id="clearMsg" style="color:#0f0; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:40px; text-shadow:2px 2px 0 #000; z-index:20;">클리어!</h3>
-            <h3 id="allClearMsg" style="color:#ffeb3b; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:40px; text-shadow:2px 2px 0 #000; z-index:20;">모든 스테이지 완료!</h3>
+    <div id="room" class="screen" style="width: 500px;">
+        <div class="header" id="roomTitle">ROOM</div>
+        <div class="content">
+            <h3 id="roomPwDisplay" style="color: #ef4444;"></h3>
+            <button class="btn-red" onclick="leaveRoom()">나가기</button>
+            <div id="playerList" style="margin: 15px 0; font-size: 18px;"></div>
+            <div id="keySelector">
+                <p id="keyGuide" style="color: #3b82f6; font-size: 18px;"></p>
+                <div>
+                    <button class="key-btn" id="btnW" onclick="selectKey('W')">W</button>
+                </div>
+                <div>
+                    <button class="key-btn" id="btnA" onclick="selectKey('A')">A</button>
+                    <button class="key-btn" id="btnS" onclick="selectKey('S')">S</button>
+                    <button class="key-btn" id="btnD" onclick="selectKey('D')">D</button>
+                </div>
+            </div>
+            <div id="myKeyDisplay" style="margin:10px; font-size:22px; color:#10b981;"></div>
+            <h2 id="stageDisplay" style="display:none; color: #f59e0b;"></h2>
+            <div id="gameContainer">
+                <div id="gameArea"></div>
+                <div id="player"></div>
+                <h3 id="clearMsg" class="overlay-msg">CLEAR!</h3>
+                <h3 id="allClearMsg" class="overlay-msg" style="color:#facc15;">ALL CLEAR!</h3>
+            </div>
         </div>
     </div>
 
@@ -83,12 +110,15 @@
         let currentRoomId = null;
         let pollInterval = null;
         let currentStage = -1;
+        
+        let allowedPlayers = [1, 2, 4];
+        let pIndex = 1;
 
         window.onload = () => {
             const saved = localStorage.getItem('gameUser');
             if (saved) {
                 currentUser = JSON.parse(saved);
-                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
+                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님!`;
                 showScreen('lobby');
             }
         };
@@ -107,6 +137,20 @@
             document.getElementById(id).classList.add('active');
         }
 
+        function changePlayers(dir) {
+            pIndex += dir;
+            if (pIndex < 0) pIndex = 0;
+            if (pIndex > 2) pIndex = 2;
+            document.getElementById('maxPlayersLabel').innerText = allowedPlayers[pIndex];
+            
+            if (allowedPlayers[pIndex] === 1) {
+                document.getElementById('roomPw').style.display = 'none';
+                document.getElementById('roomPw').value = '';
+            } else {
+                document.getElementById('roomPw').style.display = 'inline-block';
+            }
+        }
+
         async function register() {
             const res = await sendRequest({
                 type: 'register',
@@ -114,8 +158,14 @@
                 password: document.getElementById('regPw').value,
                 nickname: document.getElementById('regNick').value
             });
-            alert(res.message);
-            if(res.type === 'success') showScreen('loginScreen');
+            if (res.type === 'success') {
+                currentUser = res.user;
+                localStorage.setItem('gameUser', JSON.stringify(currentUser));
+                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님!`;
+                showScreen('lobby');
+            } else {
+                alert(res.message);
+            }
         }
 
         async function login() {
@@ -127,7 +177,7 @@
             if (res.type === 'loginSuccess') {
                 currentUser = res.user;
                 localStorage.setItem('gameUser', JSON.stringify(currentUser));
-                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
+                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님!`;
                 showScreen('lobby');
             } else {
                 alert(res.message);
@@ -146,7 +196,7 @@
                 username: currentUser.username,
                 nickname: currentUser.nickname,
                 password: document.getElementById('roomPw').value,
-                maxPlayers: document.getElementById('maxPlayers').value
+                maxPlayers: allowedPlayers[pIndex]
             });
             if (res.type === 'roomCreated') enterRoom(res.roomId);
         }
@@ -198,17 +248,17 @@
         }
 
         function updateUI(room) {
-            document.getElementById('roomTitle').innerHTML = `방 코드: <b>${room.roomId}</b> (${room.players.length}/${room.maxPlayers})`;
-            document.getElementById('roomPwDisplay').innerText = `비밀번호: ${room.password}`;
-            document.getElementById('playerList').innerHTML = room.players.map(p => `- ${p.nickname} (키: ${p.keys.length > 0 ? p.keys.join(',') : '고르는 중'})`).join('<br>');
+            document.getElementById('roomTitle').innerText = `CODE : ${room.roomId} (${room.players.length}/${room.maxPlayers})`;
+            document.getElementById('roomPwDisplay').innerText = room.password !== '없음' ? `비밀번호: ${room.password}` : '비밀번호 없음';
+            document.getElementById('playerList').innerHTML = room.players.map(p => `${p.nickname} [${p.keys.length > 0 ? p.keys.join(',') : '대기중'}]`).join('<br>');
             
             const myPlayer = room.players.find(p => p.username === currentUser.username);
             const keyLimit = 4 / room.maxPlayers;
             
-            document.getElementById('keyGuide').innerText = `1인당 ${keyLimit}개의 키를 고르세요.`;
+            document.getElementById('keyGuide').innerText = `1인당 ${keyLimit}개의 키 선택`;
             
             if (myPlayer && myPlayer.keys.length > 0) {
-                document.getElementById('myKeyDisplay').innerText = `내 키: ${myPlayer.keys.join(', ')}`;
+                document.getElementById('myKeyDisplay').innerText = `내 조작키: ${myPlayer.keys.join(', ')}`;
             }
 
             if (myPlayer && myPlayer.keys.length >= keyLimit) {
@@ -223,11 +273,11 @@
             if (room.gameState === 'playing' || room.gameState === 'clear' || room.gameState === 'allClear') {
                 document.getElementById('gameContainer').style.display = 'block';
                 document.getElementById('stageDisplay').style.display = 'block';
-                document.getElementById('stageDisplay').innerText = `스테이지 ${room.stage + 1}`;
+                document.getElementById('stageDisplay').innerText = `STAGE ${room.stage + 1}`;
                 
                 if (currentStage !== room.stage && room.mapData.length > 0) {
                     const ga = document.getElementById('gameArea');
-                    ga.style.gridTemplateColumns = `repeat(${room.mapData[0].length}, 40px)`;
+                    ga.style.gridTemplateColumns = `repeat(${room.mapData[0].length}, 45px)`;
                     ga.innerHTML = '';
                     for (let y = 0; y < room.mapData.length; y++) {
                         for (let x = 0; x < room.mapData[y].length; x++) {
@@ -244,8 +294,8 @@
                 }
 
                 const p = document.getElementById('player');
-                p.style.left = (room.pos.x * 40) + 'px';
-                p.style.top = (room.pos.y * 40) + 'px';
+                p.style.left = (room.pos.x * 45) + 'px';
+                p.style.top = (room.pos.y * 45) + 'px';
 
                 document.getElementById('clearMsg').style.display = room.gameState === 'clear' ? 'block' : 'none';
                 document.getElementById('allClearMsg').style.display = room.gameState === 'allClear' ? 'block' : 'none';
