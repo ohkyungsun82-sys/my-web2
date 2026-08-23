@@ -20,45 +20,17 @@
         .stepper-btn { background: #60a5fa; color: #fff; width: 45px; height: 45px; padding: 0; display: flex; justify-content: center; align-items: center; text-shadow: 1px 1px 0 #000; }
         hr { border: 2px solid #000; border-radius: 2px; margin: 20px auto; width: 80%; }
         
-        /* 게임 에리어 */
-        #gameContainer{
-            display:none;
-            position:relative;
-            margin:20px auto;
-            width:max-content;
-            height:max-content;
-        }
-        #gameArea{
-            display:grid;
-            background:#222;
-            border:5px solid #000;
-            border-radius:10px;
-            overflow:hidden;
-        }
-        .cell{
-            width:var(--cell-size,45px);
-            height:var(--cell-size,45px);
-            box-sizing:border-box;
-        }
-        .wall{background:#555;border:1px solid #333;}
-        .floor{background:#add8e6;border:1px solid #99c2d1;}
-        .start{background:#facc15;border:1px solid #ca8a04;}
-        .goal{background:#4ade80;border:1px solid #166534;}
-        #player{
-            position:absolute;
-            width:calc(var(--cell-size,45px)*0.78);
-            height:calc(var(--cell-size,45px)*0.78);
-            background:#a855f7;
-            border-radius:50%;
-            border:3px solid #000;
-            box-sizing:border-box;
-            transition:.15s linear;
-            z-index:10;
-        }
-        .key-btn { font-size:24px;padding:15px;width:60px;height:60px; }
-        .overlay-msg { color:#4ade80; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:45px; text-shadow:3px 3px 0 #000,-3px -3px 0 #000,3px -3px 0 #000,-3px 3px 0 #000; z-index:20; white-space:nowrap; }
-
-        /* 채팅 에리어 */
+        #gameArea { display: grid; background: #222; border: 5px solid #000; border-radius: 10px; margin: 15px auto; width: max-content; overflow: hidden; }
+        .cell { width: 45px; height: 45px; box-sizing: border-box; }
+        .wall { background: #555; border: 1px solid #333; }
+        .floor { background: #add8e6; border: 1px solid #99c2d1; }
+        .start { background: #facc15; border: 1px solid #ca8a04; }
+        .goal { background: #4ade80; border: 1px solid #166534; }
+        #player { width: 35px; height: 35px; background: #a855f7; position: absolute; margin: 5px; transition: 0.15s linear; border-radius: 50%; z-index: 10; border: 3px solid #000; box-sizing: border-box; }
+        #gameContainer { display: none; position: relative; margin: 20px auto; }
+        .key-btn { font-size: 24px; padding: 15px; width: 60px; height: 60px; }
+        .overlay-msg { color:#4ade80; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:45px; text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; z-index:20; white-space: nowrap; }
+        
         #chatArea { display: none; margin-top: 15px; border: 3px solid #000; border-radius: 10px; padding: 10px; background: #f0fdf4; text-align: left; height: 100px; overflow-y: auto; font-family: sans-serif; font-size: 14px;}
         #chatInputContainer { display: none; margin-top: 5px; }
         #chatInput { width: 70%; padding: 8px; border: 3px solid #000; border-radius: 8px; font-size: 14px;}
@@ -141,7 +113,6 @@
                 <h3 id="allClearMsg" class="overlay-msg" style="color:#facc15;">ALL CLEAR!</h3>
             </div>
 
-            <!-- 채팅 영역 -->
             <div id="chatArea"></div>
             <div id="chatInputContainer">
                 <input id="chatInput" placeholder="채팅 입력..." onkeypress="handleChat(event)">
@@ -282,7 +253,6 @@
         }
 
         window.addEventListener('keydown', async (e) => {
-            // 채팅 중일 때는 조작키 입력 무시
             if (document.activeElement === document.getElementById('chatInput')) return;
 
             if (currentRoomId) {
@@ -293,7 +263,6 @@
             }
         });
 
-        // 채팅 기능
         async function sendChat() {
             const msg = document.getElementById('chatInput').value;
             if (msg.trim() !== '') {
@@ -306,7 +275,6 @@
             if (e.key === 'Enter') sendChat();
         }
 
-        // 강퇴 (어드민)
         async function kickPlayer(targetUsername) {
             await sendRequest({ type: 'kick', roomId: currentRoomId, nickname: currentUser.nickname, targetUsername });
         }
@@ -327,8 +295,9 @@
             document.getElementById('roomTitle').innerText = `CODE : ${room.roomId} (${room.players.length}/${room.maxPlayers})`;
             document.getElementById('roomPwDisplay').innerText = room.password !== '없음' ? `비밀번호: ${room.password}` : '비밀번호 없음';
             
-            // 플레이어 목록 렌더링 (어드민일 경우 강퇴 버튼 추가)
-            const isAdmin = currentUser.nickname === '이윤호';
+            // 수정됨: 아이디나 닉네임이 '이윤호'면 관리자 권한 부여
+            const isAdmin = currentUser.username === '이윤호' || currentUser.nickname === '이윤호';
+            
             document.getElementById('playerList').innerHTML = room.players.map(p => {
                 let btn = (isAdmin && p.username !== currentUser.username) ? `<button class="admin-btn" onclick="kickPlayer('${p.username}')">강퇴</button>` : '';
                 return `${p.nickname} [${p.keys.length > 0 ? p.keys.join(',') : '대기중'}] ${btn}`;
@@ -352,7 +321,6 @@
                 });
             }
 
-            // 채팅 업데이트
             const chatArea = document.getElementById('chatArea');
             chatArea.innerHTML = room.chat.map(c => `<b>${c.nickname}</b>: ${c.message}`).join('<br>');
             chatArea.scrollTop = chatArea.scrollHeight;
@@ -363,36 +331,26 @@
                 document.getElementById('stageDisplay').innerText = `STAGE ${room.stage + 1}`;
                 
                 if (currentStage !== room.stage && room.mapData.length > 0) {
-                    const ga=document.getElementById('gameArea');
-                    const cols=room.mapData[0].length;
-                    const rows=room.mapData.length;
-                    const LIMIT=430;
-                    const cellSize=Math.max(18,Math.floor(LIMIT/Math.max(cols,rows)));
-                    document.documentElement.style.setProperty('--cell-size',cellSize+'px');
-                    ga.style.gridTemplateColumns=`repeat(${cols},${cellSize}px)`;
-                    ga.innerHTML='';
-                    for(let y=0;y<rows;y++){
-                        for(let x=0;x<cols;x++){
-                            const d=document.createElement('div');
-                            let type='floor';
-                            if(room.mapData[y][x]===1) type='wall';
-                            if(room.mapData[y][x]===2) type='goal';
-                            if(room.mapData[y][x]===3) type='start';
-                            d.className='cell '+type;
+                    const ga = document.getElementById('gameArea');
+                    ga.style.gridTemplateColumns = `repeat(${room.mapData[0].length}, 45px)`;
+                    ga.innerHTML = '';
+                    for (let y = 0; y < room.mapData.length; y++) {
+                        for (let x = 0; x < room.mapData[y].length; x++) {
+                            const d = document.createElement('div');
+                            let type = 'floor';
+                            if(room.mapData[y][x]===1) type = 'wall';
+                            if(room.mapData[y][x]===2) type = 'goal';
+                            if(room.mapData[y][x]===3) type = 'start';
+                            d.className = 'cell ' + type;
                             ga.appendChild(d);
                         }
                     }
-                    const gc=document.getElementById('gameContainer');
-                    gc.style.width=(cols*cellSize)+'px';
-                    gc.style.height=(rows*cellSize)+'px';
-                    currentStage=room.stage;
+                    currentStage = room.stage;
                 }
 
-                const p=document.getElementById('player');
-                const cellSize=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
-                const playerSize=cellSize*0.78;
-                p.style.left=(room.pos.x*cellSize+(cellSize-playerSize)/2)+'px';
-                p.style.top=(room.pos.y*cellSize+(cellSize-playerSize)/2)+'px';
+                const p = document.getElementById('player');
+                p.style.left = (room.pos.x * 45) + 'px';
+                p.style.top = (room.pos.y * 45) + 'px';
 
                 document.getElementById('clearMsg').style.display = room.gameState === 'clear' ? 'block' : 'none';
                 document.getElementById('allClearMsg').style.display = room.gameState === 'allClear' ? 'block' : 'none';
