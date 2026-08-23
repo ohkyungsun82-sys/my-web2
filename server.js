@@ -1,102 +1,133 @@
-const WebSocket = require('ws');
-const port = process.env.PORT || 8080;
-const wss = new WebSocket.Server({ port });
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-let users = {};
 let rooms = {};
+let users = [];
 
-wss.on('connection', (ws) => {
-    ws.on('message', (message) => {
-        const data = JSON.parse(message);
+const mapData = [
+    [1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,2,1],
+    [1,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,0,1],
+    [1,1,1,0,0,0,1,1,1,1],
+    [1,0,0,0,1,0,0,0,0,1],
+    [1,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1]
+];
 
-        if (data.type === 'register') {
-            if (users[data.username]) {
-                ws.send(JSON.stringify({ type: 'error', message: '이미 존재하는 계정입니다.' }));
+const server = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+        let data = {};
+        try { if (body) data = JSON.parse(body); } catch(e) {}
+
+        res.setHeader('Content-Type', 'application/json');
+
+        if (req.method === 'GET' && req.url === '/') {
+            res.setHeader('Content-Type', 'text/html');
+            res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
+            return;
+        }
+
+        if (req.method === 'POST' && req.url === '/api') {
+            const { type, username, password, nickname, roomId, maxPlayers, key } = data;
+
+            if (type === 'register') {
+                if (users.find(u => u.username === username)) {
+                    res.end(JSON.stringify({ type: 'error', message: '이미 존재하는 아이디입니다.' }));
+                } else {
+                    users.push({ username, password, nickname });
+                    res.end(JSON.stringify({ type: 'success', message: '회원가입 성공!' }));
+                }
+            } else if (type === 'login') {
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    res.end(JSON.stringify({ type: 'loginSuccess', user }));
+                } else {
+                    res.end(JSON.stringify({ type: 'error', message: '로그인 실패' }));
+                }
+            } else if (type === 'createRoom') {
+                const newId = Math.random().toString(36).substring(2, 7);
+                rooms[newId] = {
+                    roomId: newId,
+                    password: password || '',
+                    maxPlayers: parseInt(maxPlayers) || 2,
+                    gameState: 'waiting',
+                    players: [],
+                    assignedKeys: [],
+                    pos: { x: 1, y: 1 }
+                };
+                res.end(JSON.stringify({ type: 'roomCreated', roomId: newId }));
+            } else if (type === 'joinRoom') {
+                const room = rooms[roomId];
+                if (!room) {
+                    res.end(JSON.stringify({ type: 'error', message: '방이 없습니다.' }));
+                } else if (room.password !== password) {
+                    res.end(JSON.stringify({ type: 'error', message: '비밀번호가 틀립니다.' }));
+                } else if (room.players.length >= room.maxPlayers) {
+                    res.end(JSON.stringify({ type: 'error', message: '방이 꽉 찼습니다.' }));
+                } else if (room.players.some(p => p.username === username)) {
+                    res.end(JSON.stringify({ type: 'error', message: '이미 입장해 있습니다.' }));
+                } else {
+                    room.players.push({ username, nickname, key: null });
+                    res.end(JSON.stringify({ type: 'roomJoined', room }));
+                }
+            } else if (type === 'selectKey') {
+                const room = rooms[roomId];
+                if (room) {
+                    const player = room.players.find(p => p.username === username);
+                    if (player && !room.assignedKeys.includes(key)) {
+                        player.key = key;
+                        room.assignedKeys.push(key);
+                        if (room.players.length === room.maxPlayers && room.players.every(p => p.key !== null)) {
+                            room.gameState = 'playing';
+                        }
+                        res.end(JSON.stringify({ type: 'success' }));
+                    } else {
+                        res.end(JSON.stringify({ type: 'error' }));
+                    }
+                }
+            } else if (type === 'move') {
+                const room = rooms[roomId];
+                if (room && room.gameState === 'playing') {
+                    const player = room.players.find(p => p.username === username);
+                    if (player && player.key === key) {
+                        let dx = 0, dy = 0;
+                        if (key === 'W') dy = -1;
+                        if (key === 'S') dy = 1;
+                        if (key === 'A') dx = -1;
+                        if (key === 'D') dx = 1;
+
+                        while (true) {
+                            let nx = room.pos.x + dx;
+                            let ny = room.pos.y + dy;
+                            if (mapData[ny][nx] === 1) break;
+                            room.pos.x = nx;
+                            room.pos.y = ny;
+                            if (mapData[ny][nx] === 2) {
+                                room.gameState = 'clear';
+                                break;
+                            }
+                        }
+                    }
+                }
+                res.end(JSON.stringify({ type: 'success' }));
+            } else if (type === 'poll') {
+                const room = rooms[roomId];
+                if (room) {
+                    res.end(JSON.stringify({ type: 'pollData', room, mapData }));
+                } else {
+                    res.end(JSON.stringify({ type: 'error' }));
+                }
             } else {
-                users[data.username] = { password: data.password, nickname: data.nickname };
-                ws.send(JSON.stringify({ type: 'success', message: '회원가입 완료! 로그인해주세요.' }));
+                res.end(JSON.stringify({ type: 'error' }));
             }
-        }
-
-        else if (data.type === 'login') {
-            const user = users[data.username];
-            if (!user || user.password !== data.password) {
-                ws.send(JSON.stringify({ type: 'error', message: '아이디나 비밀번호가 틀렸습니다.' }));
-            } else {
-                ws.user = { username: data.username, nickname: user.nickname };
-                ws.send(JSON.stringify({ type: 'loginSuccess', user: ws.user }));
-            }
-        }
-
-        else if (data.type === 'createRoom') {
-            if (!ws.user) return;
-            const roomId = Math.random().toString(36).substring(2, 7);
-            rooms[roomId] = {
-                password: data.password,
-                maxPlayers: parseInt(data.maxPlayers),
-                players: [{ ws, username: ws.user.username, nickname: ws.user.nickname, key: null }],
-                gameState: 'waiting',
-                pos: { x: 1, y: 1 },
-                assignedKeys: []
-            };
-            ws.roomId = roomId;
-            ws.send(JSON.stringify({ type: 'roomCreated', roomId }));
-        }
-
-        else if (data.type === 'joinRoom') {
-            if (!ws.user) return;
-            const room = rooms[data.roomId];
-            if (!room) return ws.send(JSON.stringify({ type: 'error', message: '방이 없습니다.' }));
-            if (room.password !== data.password) return ws.send(JSON.stringify({ type: 'error', message: '비밀번호가 틀립니다.' }));
-            if (room.players.length >= room.maxPlayers) return ws.send(JSON.stringify({ type: 'error', message: '방이 꽉 찼습니다.' }));
-            if (room.players.some(p => p.username === ws.user.username)) {
-                return ws.send(JSON.stringify({ type: 'error', message: '이미 입장해 있는 계정입니다.' }));
-            }
-
-            room.players.push({ ws, username: ws.user.username, nickname: ws.user.nickname, key: null });
-            ws.roomId = data.roomId;
-            ws.send(JSON.stringify({ type: 'roomJoined', roomId: data.roomId }));
-            broadcastRoom(room);
-        }
-
-        else if (data.type === 'selectKey') {
-            const room = rooms[ws.roomId];
-            if (!room) return;
-            const player = room.players.find(p => p.ws === ws);
-            if (player && !room.assignedKeys.includes(data.key)) {
-                player.key = data.key;
-                room.assignedKeys.push(data.key);
-                if (room.players.every(p => p.key !== null)) room.gameState = 'playing';
-                broadcastRoom(room);
-            }
-        }
-
-        else if (data.type === 'move') {
-            const room = rooms[ws.roomId];
-            if (!room || room.gameState !== 'playing') return;
-            const player = room.players.find(p => p.ws === ws);
-            if (player && player.key === data.key) {
-                if (data.key === 'W') room.pos.y -= 1;
-                if (data.key === 'S') room.pos.y += 1;
-                if (data.key === 'A') room.pos.x -= 1;
-                if (data.key === 'D') room.pos.x += 1;
-                broadcastRoom(room);
-            }
-        }
-    });
-
-    ws.on('close', () => {
-        if (ws.roomId && rooms[ws.roomId]) {
-            rooms[ws.roomId].players = rooms[ws.roomId].players.filter(p => p.ws !== ws);
-            if (rooms[ws.roomId].players.length === 0) delete rooms[ws.roomId];
-            else broadcastRoom(rooms[ws.roomId]);
         }
     });
 });
 
-function broadcastRoom(room) {
-    const data = JSON.stringify({ type: 'update', room });
-    room.players.forEach(p => {
-        if (p.ws.readyState === WebSocket.OPEN) p.ws.send(data);
-    });
-}
+const port = process.env.PORT || 8080;
+server.listen(port);

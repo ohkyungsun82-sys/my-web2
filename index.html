@@ -2,19 +2,23 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>팀워크 얼음 퍼즐</title>
+    <title>Ender Dash Multiplayer</title>
     <style>
         body { text-align: center; background: #111; color: white; font-family: sans-serif; margin-top: 50px; }
         .screen { display: none; }
         .active { display: block; }
-        #board { width: 400px; height: 400px; background: #222; margin: 20px auto; position: relative; border: 4px solid #444; }
-        #player { width: 40px; height: 40px; background: #ff4757; position: absolute; border-radius: 50%; transition: 0.1s; }
+        #gameContainer { display: none; position: relative; width: max-content; margin: 20px auto; border: 4px solid #444; }
+        #gameArea { display: grid; background: #222; }
+        .cell { width: 40px; height: 40px; box-sizing: border-box; }
+        .wall { background: #555; border: 1px solid #333; }
+        .floor { background: #add8e6; border: 1px solid #99c2d1; }
+        .goal { background: #00ff00; }
+        #player { width: 36px; height: 36px; background: #8a2be2; position: absolute; margin: 2px; transition: 0.15s linear; border-radius: 50%; z-index: 10; }
         .key-btn { font-size: 20px; padding: 10px 20px; margin: 5px; cursor: pointer; }
         input, select { padding: 8px; margin: 5px; }
     </style>
 </head>
 <body>
-
     <div id="authScreen" class="screen active">
         <h1>로그인 및 회원가입</h1>
         <input id="authId" placeholder="아이디"><br>
@@ -25,10 +29,9 @@
     </div>
 
     <div id="lobby" class="screen">
-        <h1 id="welcomeMsg">환영합니다!</h1>
+        <h1 id="welcomeMsg"></h1>
         <button onclick="logout()">로그아웃</button>
         <hr style="width:50%; margin:20px auto;">
-        <h3>방 만들기</h3>
         <input id="roomPw" type="password" placeholder="방 비밀번호"><br>
         <select id="maxPlayers">
             <option value="2">2인용</option>
@@ -36,139 +39,167 @@
         </select><br>
         <button onclick="createRoom()">방 만들기</button>
         <hr style="width:50%; margin:20px auto;">
-        <h3>방 들어가기</h3>
         <input id="joinRoomId" placeholder="방 코드"><br>
         <input id="joinRoomPw" type="password" placeholder="방 비밀번호"><br>
         <button onclick="joinRoom()">참가하기</button>
     </div>
 
     <div id="room" class="screen">
-        <h2>대기실</h2>
-        <div id="inviteArea"></div>
+        <h2 id="roomTitle">대기실</h2>
         <div id="playerList"></div>
         <div id="keySelector" style="margin-top:20px;">
-            <h3>담당할 키를 고르세요</h3>
             <button class="key-btn" id="btnW" onclick="selectKey('W')">W</button>
             <button class="key-btn" id="btnA" onclick="selectKey('A')">A</button>
             <button class="key-btn" id="btnS" onclick="selectKey('S')">S</button>
             <button class="key-btn" id="btnD" onclick="selectKey('D')">D</button>
         </div>
-    </div>
-
-    <div id="game" class="screen">
-        <h2 id="myAssignedKey">내 키: 없음</h2>
-        <div id="board">
+        <div id="myKeyDisplay" style="margin:20px; font-size:20px; color:#ffeb3b;"></div>
+        <div id="gameContainer">
+            <div id="gameArea"></div>
             <div id="player"></div>
+            <h3 id="clearMsg" style="color:#0f0; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:40px; text-shadow:2px 2px 0 #000; z-index:20;">클리어!</h3>
         </div>
     </div>
 
     <script>
-        const ws = new WebSocket(`ws://${location.host}`);
         let currentUser = null;
-        let myKey = null;
+        let currentRoomId = null;
+        let pollInterval = null;
+        let mapDrawn = false;
 
-        ws.onopen = () => {
-            const savedUser = localStorage.getItem('gameUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showScreen('lobby');
-                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const autoRoom = urlParams.get('room');
-                if (autoRoom) document.getElementById('joinRoomId').value = autoRoom;
-            }
-        };
+        async function sendRequest(data) {
+            const res = await fetch('/api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await res.json();
+        }
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'success' || data.type === 'error') {
-                alert(data.message);
-            } else if (data.type === 'loginSuccess') {
-                currentUser = data.user;
-                localStorage.setItem('gameUser', JSON.stringify(currentUser));
-                showScreen('lobby');
-                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
-            } else if (data.type === 'roomCreated' || data.type === 'roomJoined') {
-                showScreen('room');
-            } else if (data.type === 'update') {
-                updateUI(data.room);
-            }
-        };
-
-        function register() {
-            ws.send(JSON.stringify({
+        async function register() {
+            const res = await sendRequest({
                 type: 'register',
                 username: document.getElementById('authId').value,
                 password: document.getElementById('authPw').value,
                 nickname: document.getElementById('authNick').value
-            }));
+            });
+            alert(res.message);
         }
 
-        function login() {
-            ws.send(JSON.stringify({
+        async function login() {
+            const res = await sendRequest({
                 type: 'login',
                 username: document.getElementById('authId').value,
                 password: document.getElementById('authPw').value
-            }));
+            });
+            if (res.type === 'loginSuccess') {
+                currentUser = res.user;
+                showScreen('lobby');
+                document.getElementById('welcomeMsg').innerText = `${currentUser.nickname}님 환영합니다!`;
+            } else {
+                alert(res.message);
+            }
         }
 
         function logout() {
-            localStorage.removeItem('gameUser');
             currentUser = null;
+            clearInterval(pollInterval);
             showScreen('authScreen');
         }
 
-        function createRoom() {
-            ws.send(JSON.stringify({
+        async function createRoom() {
+            const res = await sendRequest({
                 type: 'createRoom',
                 password: document.getElementById('roomPw').value,
                 maxPlayers: document.getElementById('maxPlayers').value
-            }));
+            });
+            if (res.type === 'roomCreated') {
+                enterRoom(res.roomId);
+            }
         }
 
-        function joinRoom() {
-            ws.send(JSON.stringify({
+        async function joinRoom() {
+            const res = await sendRequest({
                 type: 'joinRoom',
                 roomId: document.getElementById('joinRoomId').value,
-                password: document.getElementById('joinRoomPw').value
-            }));
+                password: document.getElementById('joinRoomPw').value,
+                username: currentUser.username,
+                nickname: currentUser.nickname
+            });
+            if (res.type === 'roomJoined') {
+                enterRoom(res.room.roomId);
+            } else {
+                alert(res.message);
+            }
         }
 
-        function selectKey(key) {
-            myKey = key;
-            ws.send(JSON.stringify({ type: 'selectKey', key }));
-            document.getElementById('keySelector').style.display = 'none';
-            document.getElementById('myAssignedKey').innerText = `내 담당 키: ${key}`;
+        function enterRoom(roomId) {
+            currentRoomId = roomId;
+            showScreen('room');
+            mapDrawn = false;
+            pollInterval = setInterval(pollRoom, 150);
         }
 
-        window.addEventListener('keydown', (e) => {
-            const k = e.key.toUpperCase();
-            if (k === myKey) ws.send(JSON.stringify({ type: 'move', key: k }));
+        async function selectKey(k) {
+            await sendRequest({ type: 'selectKey', roomId: currentRoomId, username: currentUser.username, key: k });
+        }
+
+        window.addEventListener('keydown', async (e) => {
+            if (currentRoomId) {
+                const k = e.key.toUpperCase();
+                if (['W','A','S','D'].includes(k)) {
+                    await sendRequest({ type: 'move', roomId: currentRoomId, username: currentUser.username, key: k });
+                }
+            }
         });
 
-        function updateUI(room) {
-            if (room.gameState === 'playing') {
-                showScreen('game');
+        async function pollRoom() {
+            const res = await sendRequest({ type: 'poll', roomId: currentRoomId });
+            if (res.type === 'pollData') {
+                updateUI(res.room, res.mapData);
+            }
+        }
+
+        function updateUI(room, mapData) {
+            document.getElementById('roomTitle').innerHTML = `방 코드: <b>${room.roomId}</b> (${room.players.length}/${room.maxPlayers})`;
+            document.getElementById('playerList').innerHTML = room.players.map(p => `- ${p.nickname} (키: ${p.key || '선택 중'})`).join('<br>');
+            
+            const myPlayer = room.players.find(p => p.username === currentUser.username);
+            if (myPlayer && myPlayer.key) {
+                document.getElementById('myKeyDisplay').innerText = `내 담당 키: ${myPlayer.key}`;
+                document.getElementById('keySelector').style.display = 'none';
+            } else {
+                document.getElementById('keySelector').style.display = 'block';
+                ['W','A','S','D'].forEach(k => {
+                    document.getElementById('btn'+k).disabled = room.assignedKeys.includes(k);
+                });
+            }
+
+            if (room.gameState === 'playing' || room.gameState === 'clear') {
+                document.getElementById('gameContainer').style.display = 'block';
+                
+                if (!mapDrawn) {
+                    const ga = document.getElementById('gameArea');
+                    ga.style.gridTemplateColumns = `repeat(${mapData[0].length}, 40px)`;
+                    ga.innerHTML = '';
+                    for (let y = 0; y < mapData.length; y++) {
+                        for (let x = 0; x < mapData[y].length; x++) {
+                            const d = document.createElement('div');
+                            d.className = 'cell ' + (mapData[y][x] === 1 ? 'wall' : mapData[y][x] === 2 ? 'goal' : 'floor');
+                            ga.appendChild(d);
+                        }
+                    }
+                    mapDrawn = true;
+                }
+
                 const p = document.getElementById('player');
                 p.style.left = (room.pos.x * 40) + 'px';
                 p.style.top = (room.pos.y * 40) + 'px';
+
+                if (room.gameState === 'clear') {
+                    document.getElementById('clearMsg').style.display = 'block';
+                }
             }
-
-            const inviteLink = `${location.origin}${location.pathname}?room=${room.roomId || ''}`;
-            document.getElementById('inviteArea').innerHTML = `
-                방 코드: <b>${room.roomId || ''}</b><br>
-                초대 링크: <input type="text" value="${inviteLink}" readonly style="width:250px;" onclick="this.select()">
-                <p style="font-size:12px; color:#aaa;">(링크를 복사해서 주거나 스마트폰으로 주소 접속 가능)</p>
-            `;
-
-            const list = document.getElementById('playerList');
-            list.innerHTML = `참가자:<br>` + room.players.map(p => `- ${p.nickname} (${p.key ? '키: ' + p.key : '선택 중'})`).join('<br>');
-
-            room.assignedKeys.forEach(k => {
-                const btn = document.getElementById('btn' + k);
-                if (btn) btn.disabled = true;
-            });
         }
 
         function showScreen(id) {
