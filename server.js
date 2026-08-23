@@ -4,25 +4,27 @@ const path = require('path');
 
 let rooms = {};
 let users = [];
+let bannedUsers = {}; // 밴 목록 { username: 밴 해제 시간(timestamp) }
 
+// 맵 수정: 막혀서 못 깨는 부분 해결
 const maps = [
     [
-        [1,1,1,1,1,1,1,1],
-        [1,3,0,0,0,0,2,1],
-        [1,1,1,1,1,1,1,1]
+        [1,1,1,1,1,1,1,1,1],
+        [1,3,0,0,0,0,0,2,1],
+        [1,1,1,1,1,1,1,1,1]
     ],
     [
-        [1,1,1,1,1,1,1,1],
-        [1,3,0,0,1,0,2,1],
-        [1,1,1,0,0,0,1,1],
-        [1,1,1,1,1,1,1,1]
+        [1,1,1,1,1,1,1,1,1],
+        [1,3,0,0,1,0,0,2,1],
+        [1,1,1,0,0,0,1,1,1],
+        [1,1,1,1,1,1,1,1,1]
     ],
     [
-        [1,1,1,1,1,1,1,1],
-        [1,3,0,0,1,0,0,1],
-        [1,0,1,0,0,0,1,1],
-        [1,0,0,0,1,0,2,1],
-        [1,1,1,1,1,1,1,1]
+        [1,1,1,1,1,1,1,1,1],
+        [1,3,0,0,1,0,0,0,1],
+        [1,0,1,0,0,0,1,0,1],
+        [1,0,0,0,1,0,1,2,1],
+        [1,1,1,1,1,1,1,1,1]
     ]
 ];
 
@@ -55,7 +57,16 @@ const server = http.createServer((req, res) => {
         }
 
         if (req.method === 'POST' && req.url === '/api') {
-            const { type, username, password, nickname, roomId, maxPlayers, key } = data;
+            const { type, username, password, nickname, roomId, maxPlayers, key, message, targetUsername } = data;
+
+            // 밴 체크
+            if (username && bannedUsers[username]) {
+                if (Date.now() < bannedUsers[username]) {
+                    return res.end(JSON.stringify({ type: 'error', message: '이용이 정지된 계정입니다.' }));
+                } else {
+                    delete bannedUsers[username];
+                }
+            }
 
             if (type === 'register') {
                 if (users.find(u => u.username === username)) {
@@ -84,7 +95,8 @@ const server = http.createServer((req, res) => {
                     players: [{ username, nickname, keys: [] }],
                     assignedKeys: [],
                     pos: { x: 0, y: 0 },
-                    mapData: []
+                    mapData: [],
+                    chat: [] // 채팅 기록
                 };
                 res.end(JSON.stringify({ type: 'roomCreated', roomId: newId }));
             } else if (type === 'joinRoom') {
@@ -163,10 +175,29 @@ const server = http.createServer((req, res) => {
                     }
                 }
                 res.end(JSON.stringify({ type: 'success' }));
+            } else if (type === 'chat') {
+                const room = rooms[roomId];
+                if (room) {
+                    room.chat.push({ nickname, message });
+                    if (room.chat.length > 20) room.chat.shift();
+                }
+                res.end(JSON.stringify({ type: 'success' }));
+            } else if (type === 'kick') {
+                // 이윤호(admin) 전용 기능
+                const room = rooms[roomId];
+                if (room && nickname === '이윤호') {
+                    room.players = room.players.filter(p => p.username !== targetUsername);
+                }
+                res.end(JSON.stringify({ type: 'success' }));
             } else if (type === 'poll') {
                 const room = rooms[roomId];
                 if (room) {
-                    res.end(JSON.stringify({ type: 'pollData', room }));
+                    const playerExists = room.players.some(p => p.username === username);
+                    if (!playerExists) {
+                        res.end(JSON.stringify({ type: 'kicked' })); // 킥 당했을 때
+                    } else {
+                        res.end(JSON.stringify({ type: 'pollData', room }));
+                    }
                 } else {
                     res.end(JSON.stringify({ type: 'error' }));
                 }

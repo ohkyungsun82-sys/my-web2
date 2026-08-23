@@ -5,7 +5,7 @@
     <title>Ender Dash</title>
     <style>
         body { font-family: 'Arial Black', sans-serif; background: #60a5fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .screen { display: none; background: #fff; border: 5px solid #000; border-radius: 20px; width: 420px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); overflow: hidden; text-align: center; }
+        .screen { display: none; background: #fff; border: 5px solid #000; border-radius: 20px; width: 450px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); overflow: hidden; text-align: center; }
         .active { display: block; }
         .header { background: #93c5fd; border-bottom: 5px solid #000; padding: 15px; color: #fff; font-size: 26px; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
         .content { padding: 25px; }
@@ -19,6 +19,8 @@
         .settings-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 15px 0; font-size: 22px; }
         .stepper-btn { background: #60a5fa; color: #fff; width: 45px; height: 45px; padding: 0; display: flex; justify-content: center; align-items: center; text-shadow: 1px 1px 0 #000; }
         hr { border: 2px solid #000; border-radius: 2px; margin: 20px auto; width: 80%; }
+        
+        /* 게임 에리어 */
         #gameArea { display: grid; background: #222; border: 5px solid #000; border-radius: 10px; margin: 15px auto; width: max-content; overflow: hidden; }
         .cell { width: 45px; height: 45px; box-sizing: border-box; }
         .wall { background: #555; border: 1px solid #333; }
@@ -29,6 +31,12 @@
         #gameContainer { display: none; position: relative; margin: 20px auto; }
         .key-btn { font-size: 24px; padding: 15px; width: 60px; height: 60px; }
         .overlay-msg { color:#4ade80; display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:45px; text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; z-index:20; white-space: nowrap; }
+        
+        /* 채팅 에리어 */
+        #chatArea { display: none; margin-top: 15px; border: 3px solid #000; border-radius: 10px; padding: 10px; background: #f0fdf4; text-align: left; height: 100px; overflow-y: auto; font-family: sans-serif; font-size: 14px;}
+        #chatInputContainer { display: none; margin-top: 5px; }
+        #chatInput { width: 70%; padding: 8px; border: 3px solid #000; border-radius: 8px; font-size: 14px;}
+        .admin-btn { font-size: 12px; padding: 4px 8px; background: #f87171; color: white; border: 2px solid #000; margin-left: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -77,12 +85,14 @@
         </div>
     </div>
 
-    <div id="room" class="screen" style="width: 500px;">
+    <div id="room" class="screen" style="width: 550px;">
         <div class="header" id="roomTitle">ROOM</div>
         <div class="content">
             <h3 id="roomPwDisplay" style="color: #ef4444;"></h3>
             <button class="btn-red" onclick="leaveRoom()">나가기</button>
+            
             <div id="playerList" style="margin: 15px 0; font-size: 18px;"></div>
+            
             <div id="keySelector">
                 <p id="keyGuide" style="color: #3b82f6; font-size: 18px;"></p>
                 <div>
@@ -95,12 +105,21 @@
                 </div>
             </div>
             <div id="myKeyDisplay" style="margin:10px; font-size:22px; color:#10b981;"></div>
+            
             <h2 id="stageDisplay" style="display:none; color: #f59e0b;"></h2>
+            
             <div id="gameContainer">
                 <div id="gameArea"></div>
                 <div id="player"></div>
                 <h3 id="clearMsg" class="overlay-msg">CLEAR!</h3>
                 <h3 id="allClearMsg" class="overlay-msg" style="color:#facc15;">ALL CLEAR!</h3>
+            </div>
+
+            <!-- 채팅 영역 -->
+            <div id="chatArea"></div>
+            <div id="chatInputContainer">
+                <input id="chatInput" placeholder="채팅 입력..." onkeypress="handleChat(event)">
+                <button class="btn-blue" style="padding: 6px 12px; font-size:14px; width:auto;" onclick="sendChat()">전송</button>
             </div>
         </div>
     </div>
@@ -216,6 +235,8 @@
         function enterRoom(roomId) {
             currentRoomId = roomId;
             currentStage = -1;
+            document.getElementById('chatArea').style.display = 'block';
+            document.getElementById('chatInputContainer').style.display = 'block';
             showScreen('room');
             pollInterval = setInterval(pollRoom, 150);
         }
@@ -225,6 +246,8 @@
             clearInterval(pollInterval);
             currentRoomId = null;
             document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('chatArea').style.display = 'none';
+            document.getElementById('chatInputContainer').style.display = 'none';
             showScreen('lobby');
         }
 
@@ -233,6 +256,9 @@
         }
 
         window.addEventListener('keydown', async (e) => {
+            // 채팅 중일 때는 조작키 입력 무시
+            if (document.activeElement === document.getElementById('chatInput')) return;
+
             if (currentRoomId) {
                 const k = e.key.toUpperCase();
                 if (['W','A','S','D'].includes(k)) {
@@ -241,16 +267,46 @@
             }
         });
 
+        // 채팅 기능
+        async function sendChat() {
+            const msg = document.getElementById('chatInput').value;
+            if (msg.trim() !== '') {
+                await sendRequest({ type: 'chat', roomId: currentRoomId, nickname: currentUser.nickname, message: msg });
+                document.getElementById('chatInput').value = '';
+            }
+        }
+
+        function handleChat(e) {
+            if (e.key === 'Enter') sendChat();
+        }
+
+        // 강퇴 (어드민)
+        async function kickPlayer(targetUsername) {
+            await sendRequest({ type: 'kick', roomId: currentRoomId, nickname: currentUser.nickname, targetUsername });
+        }
+
         async function pollRoom() {
-            const res = await sendRequest({ type: 'poll', roomId: currentRoomId });
-            if (res.type === 'pollData') updateUI(res.room);
-            if (res.type === 'error') leaveRoom();
+            const res = await sendRequest({ type: 'poll', roomId: currentRoomId, username: currentUser.username });
+            if (res.type === 'pollData') {
+                updateUI(res.room);
+            } else if (res.type === 'kicked') {
+                alert('방에서 강퇴당했습니다.');
+                leaveRoom();
+            } else if (res.type === 'error') {
+                leaveRoom();
+            }
         }
 
         function updateUI(room) {
             document.getElementById('roomTitle').innerText = `CODE : ${room.roomId} (${room.players.length}/${room.maxPlayers})`;
             document.getElementById('roomPwDisplay').innerText = room.password !== '없음' ? `비밀번호: ${room.password}` : '비밀번호 없음';
-            document.getElementById('playerList').innerHTML = room.players.map(p => `${p.nickname} [${p.keys.length > 0 ? p.keys.join(',') : '대기중'}]`).join('<br>');
+            
+            // 플레이어 목록 렌더링 (어드민일 경우 강퇴 버튼 추가)
+            const isAdmin = currentUser.nickname === '이윤호';
+            document.getElementById('playerList').innerHTML = room.players.map(p => {
+                let btn = (isAdmin && p.username !== currentUser.username) ? `<button class="admin-btn" onclick="kickPlayer('${p.username}')">강퇴</button>` : '';
+                return `${p.nickname} [${p.keys.length > 0 ? p.keys.join(',') : '대기중'}] ${btn}`;
+            }).join('<br>');
             
             const myPlayer = room.players.find(p => p.username === currentUser.username);
             const keyLimit = 4 / room.maxPlayers;
@@ -269,6 +325,11 @@
                     document.getElementById('btn'+k).disabled = room.assignedKeys.includes(k);
                 });
             }
+
+            // 채팅 업데이트
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = room.chat.map(c => `<b>${c.nickname}</b>: ${c.message}`).join('<br>');
+            chatArea.scrollTop = chatArea.scrollHeight;
 
             if (room.gameState === 'playing' || room.gameState === 'clear' || room.gameState === 'allClear') {
                 document.getElementById('gameContainer').style.display = 'block';
